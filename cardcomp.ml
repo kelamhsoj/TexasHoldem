@@ -173,7 +173,6 @@ let is_flush (clist:card list) : bool =
     match cards with
       | [] -> true
       | h::t -> if h.suit = s then true && helper t s else false in
-
   helper clist ((List.hd clist).suit)
 
 (*Returns true if a a 5 card hand is a straight*)
@@ -200,42 +199,102 @@ let make_straight_flush (clist:card list) : hand option  =
 let make_four_kind (clist:card list) : hand option  =
   let sorted = card_sort clist in
   if ((List.nth sorted 0) = (List.nth sorted 1) && (List.nth sorted 1) =
-     (List.nth sorted 2) && (List.nth sorted 2) = (List.nth sorted 3)) ||
-     ((List.nth sorted 1) = (List.nth sorted 2) && (List.nth sorted 2) =
+     (List.nth sorted 2) && (List.nth sorted 2) = (List.nth sorted 3))
+  then Some (Fourofkind ((List.hd sorted),(List.nth sorted 4)))
+  else
+     if ((List.nth sorted 1) = (List.nth sorted 2) && (List.nth sorted 2) =
      (List.nth sorted 3) && (List.nth sorted 3) = (List.nth sorted 4))
-  then Some (Fourofkind ((List.nth sorted 4), (List.hd sorted)))
-  else None
+     then Some (Fourofkind ((List.nth sorted 4), (List.hd sorted)))
+     else None
 
 (*If the 5 card list is a full house, return Some Fullhouse
   else return None*)
 let make_full_house (clist:card list) : hand option  =
-  failwith "TODO"
+  let sorted = card_sort clist in
+  if ((List.nth sorted 0) = (List.nth sorted 1) && (List.nth sorted 1) =
+     (List.nth sorted 2) && (List.nth sorted 3) = (List.nth sorted 4))
+  then Some (Fullhouse ((List.nth sorted 0),(List.nth sorted 3)))
+  else
+      if ((List.nth sorted 0) = (List.nth sorted 1) && (List.nth sorted 2) =
+      (List.nth sorted 3) && (List.nth sorted 3) = (List.nth sorted 4))
+      then Some (Fullhouse ((List.nth sorted 2),(List.nth sorted 0)))
+      else None
+
 
 (*If the 5 card list is a flush, return Some Flush
   else return None*)
 let make_flush (clist:card list) : hand option  =
-  failwith "TODO"
+  if (is_flush clist) then
+    let sorted = card_sort clist in
+    Some (Flush( ((List.hd sorted).suit), sorted))
+  else None
 
 (*If the 5 card list is a straight, return Some Straight
   else return None*)
 let make_straight (clist:card list) : hand option  =
-  failwith "TODO"
+  if (is_straight clist) then Some (Straight (List.hd (card_sort clist)))
+  else None
 
 (*If the 5 card list is a three of a kind, return Some Threeofkind
   else return None*)
 let make_three_kind (clist:card list) : hand option  =
-  failwith "TODO"
+  let sorted = card_sort clist in
+  if (List.nth sorted 0) = (List.nth sorted 1) && (List.nth sorted 1) =
+      (List.nth sorted 2)
+  then Some (Threeofkind ((List.nth sorted 0),
+            [(List.nth sorted 3); (List.nth sorted 4)] ))
+  else
+      if (List.nth sorted 1) = (List.nth sorted 2) && (List.nth sorted 2) =
+        (List.nth sorted 3)
+      then Some (Threeofkind ((List.nth sorted 1),
+                  [(List.nth sorted 0); (List.nth sorted 4)] ))
+      else
+          if (List.nth sorted 2) = (List.nth sorted 3) && (List.nth sorted 3) =
+             (List.nth sorted 4)
+          then Some (Threeofkind ((List.nth sorted 2),
+                  [(List.nth sorted 0); (List.nth sorted 1)] ))
+          else None
 
 (*If the 5 card list is a two pair, return Some Twopair
   else return None*)
 let make_two_pair (clist:card list) : hand option  =
-  failwith "TODO"
+  let sorted = card_sort clist in
+  if (List.nth sorted 0) = (List.nth sorted 1) && (List.nth sorted 2) =
+      (List.nth sorted 3)
+  then Some (Twopair ((List.nth sorted 0), (List.nth sorted 2),
+                     (List.nth sorted 4)))
+  else
+      if (List.nth sorted 1) = (List.nth sorted 2) && (List.nth sorted 3) =
+        (List.nth sorted 4)
+      then Some (Twopair ((List.nth sorted 1), (List.nth sorted 3),
+                     (List.nth sorted 0)))
+      else
+          if (List.nth sorted 0) = (List.nth sorted 1) && (List.nth sorted 3) =
+             (List.nth sorted 4)
+          then Some (Twopair ((List.nth sorted 0), (List.nth sorted 3),
+                     (List.nth sorted 2)))
+          else None
 
 (*If the 5 card list is a one pair, return Some Onepair
   else return None*)
 let make_one_pair (clist:card list) : hand option  =
-  failwith "TODO"
-
+  let sorted = card_sort clist in
+  if (List.nth sorted 0) = (List.nth sorted 1)
+  then Some (Onepair ((List.nth sorted 0),
+            [(List.nth sorted 2); (List.nth sorted 3); (List.nth sorted 4)] ))
+  else
+      if (List.nth sorted 1) = (List.nth sorted 2)
+      then Some (Onepair ((List.nth sorted 1),
+            [(List.nth sorted 0); (List.nth sorted 3); (List.nth sorted 4)] ))
+      else
+          if (List.nth sorted 2) = (List.nth sorted 3)
+          then Some (Onepair ((List.nth sorted 2),
+            [(List.nth sorted 0); (List.nth sorted 1); (List.nth sorted 4)] ))
+          else
+              if (List.nth sorted 3) = (List.nth sorted 4)
+              then Some (Onepair ((List.nth sorted 3),
+               [(List.nth sorted 0); (List.nth sorted 1); (List.nth sorted 2)]))
+              else None
 
 
 (*Takes a list of 5 cards and returns a corresponding hand representation*)
