@@ -48,7 +48,7 @@ let is_better_hand clist1 clist2 =
   failwith "TODO"
 
 let card_to_points  (c:card) =
-  match v.value with
+  match c.value with
     | Ace -> 14
     | King -> 13
     | Queen -> 12

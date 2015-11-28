@@ -1,14 +1,31 @@
-(*Represents a card with a suit and a value*)
-type card
-
-(*Represents a list of cards*)
-type deck
-
 (*Represents clubs, hearts, diamonds, spades *)
-type suits
+type suits =
+  | Heart
+  | Spade
+  | Club
+  | Diamond
 
 (*Represents ace, king, queen, jack, 10, 9, 8, 7, 6, 5, 4, 3, 2 *)
-type values
+type values =
+  | Ace
+  | King
+  | Queen
+  | Jack
+  | Ten
+  | Nine
+  | Eight
+  | Seven
+  | Six
+  | Five
+  | Four
+  | Three
+  | Two
+
+(*Represents a card with a suit and a value*)
+type card = {suit: suits; value: values}
+
+(*Represents a list of cards*)
+type deck = card list
 
 (*Randomly shuffles the element of the deck*)
 val shuffle: deck -> deck
