@@ -1,7 +1,6 @@
 open Deck
 
-(*
- * card represents the highest card in the hand-combination. If the highest
+(* card represents the highest card in the hand-combination. If the highest
   * card is the same, and the combo is the same, then the two hands are
  * equivalent
  * Invariant: the first Card of Hand represents:
@@ -13,6 +12,9 @@ open Deck
   last card represents the kicker
   5. for one pair - the largest pair
   the cardlist represents the kicker
+  6. for all the contructors that have a card
+  list the cards are sorted from greatest to
+  least based on their values.
   *)
 
 type hand =
@@ -27,17 +29,6 @@ type hand =
   | Highcard of card list
 
 
-(*returns 1 if first hand is larger, 0 if equal, -1 if smaller*)
-let compare firsthand secondhand =
-  failwith "TODO"
-(* match firsthand with
-   | Straightflush (s,c) -> (match secondhand with
-                               | Straightflush (s',c') -> _
-                               | _ -> 1 )
-   | Fourofkind (card, card) -> (match secondhand with
-                                | )
-   | _ -> failwith "TODO"*)
-
 let best_hand clist =
   failwith "TODO"
 
@@ -47,7 +38,8 @@ let hand_value clist =
 let is_better_hand clist1 clist2 =
   failwith "TODO"
 
-let card_to_points  (c:card) =
+(*Turns a card to an integer value based on its value *)
+let card_to_points  (c:card) : int =
   match c.value with
     | Ace -> 14
     | King -> 13
@@ -63,7 +55,120 @@ let card_to_points  (c:card) =
     | Three -> 3
     | Two -> 2
 
-let is_flush clist =
+
+(*Returns the card list as an int list*)
+let cardlist_to_points  (clist:card list) : int list =
+  List.map (fun c -> card_to_points c) clist
+
+(* precondition: the lsts are of the same size
+ * both list are sorted from greatest to least*)
+let rec cardlistcompare lst1 lst2 =
+  match (lst1, lst2) with
+  | ([],[]) -> 0
+  | (h::t , h'::t') -> if (card_to_points h) > (card_to_points h') then 1
+                       else if (card_to_points h) < (card_to_points h') then -1
+                       else cardlistcompare t t'
+  | (_,_) -> failwith "precondition: the list are of the same length"
+
+(*returns 1 if first hand is larger, 0 if equal, -1 if smaller*)
+let compare (firsthand :hand) (secondhand: hand) =
+  let number = card_to_points in
+  match firsthand with
+  | Straightflush (_,c) ->
+                  (match secondhand with
+                   | Straightflush (_,c') ->
+                   (if (number c) > (number c') then 1
+                   else if (number c) < (number c') then -1
+                   else 0)
+                   | _ -> 1 )
+  | Fourofkind (card4, card1) ->
+                  (match secondhand with
+                   | Straightflush _ -> -1
+                   | Fourofkind (card4', card1')->
+                   (if (number card4) > (number card4') then 1
+                   else if (number card4) < (number card4') then -1
+                   else if (number card1) < (number card1') then -1
+                   else if (number card1) > (number card1') then 1
+                   else 0)
+                   | _ -> 1)
+  | Fullhouse (card3, card2) ->
+                  (match secondhand with
+                   | Straightflush _ -> -1
+                   | Fourofkind _ -> -1
+                   | Fullhouse (card3', card2') ->
+                   (if (number card3) > (number card3') then 1
+                   else if (number card3) < (number card3') then -1
+                   else if (number card2) > (number card2') then 1
+                   else if (number card2) < (number card2') then -1
+                   else 0)
+                   | _ -> 1)
+
+  | Flush (s, cardlst) ->
+                  (match secondhand with
+                   | Straightflush _ -> -1
+                   | Fourofkind _ -> -1
+                   | Fullhouse _ -> -1
+                   | Flush (s', cardlst') -> cardlistcompare cardlst cardlst'
+                   | _ -> 1)
+  | Straight highcard ->
+                (match secondhand with
+                   | Straight highcard'->
+                   (if (number highcard) > (number highcard') then 1
+                   else if (number highcard) < (number highcard') then -1
+                   else 0)
+                   | Threeofkind _ -> 1
+                   | Twopair _ -> 1
+                   | Onepair _ -> 1
+                   | Highcard _ -> 1
+                   | _ -> -1)
+  | Threeofkind (triple, kicker) ->
+                (match secondhand with
+                 | Twopair _ -> 1
+                 | Onepair _ -> 1
+                 | Highcard _ -> 1
+                 | Threeofkind (triple', kicker') ->
+                 (if (number triple) > (number triple') then 1
+                 else if (number triple) < (number triple') then -1
+                 else cardlistcompare kicker kicker')
+                 | _ -> -1)
+  | Twopair (pair1, pair2, kicker) ->
+                (match secondhand with
+                 | Onepair _ -> 1
+                 | Highcard _ -> 1
+                 | Twopair (pair1', pair2', kicker') ->
+                 (    if (number pair1) > (number pair1') then 1
+                 else if (number pair1) < (number pair1') then -1
+                 else if (number pair2) > (number pair2') then 1
+                 else if (number pair2) < (number pair2') then -1
+                 else if (number kicker) > (number kicker') then 1
+                 else if (number kicker) < (number kicker') then -1
+                 else 0)
+                 | _ -> -1)
+  | Onepair (pair, kicker) ->
+                (match secondhand with
+                 | Highcard _ -> 1
+                 | Onepair (pair', kicker') ->
+                 (     if (number pair) > (number pair') then 1
+                  else if (number pair) < (number pair') then -1
+                  else cardlistcompare kicker kicker')
+                 | _ -> -1)
+  | Highcard cardlst ->
+                (match secondhand with
+                   | Highcard cardlst' -> cardlistcompare cardlst cardlst'
+                   | _ -> -1)
+
+(*Returns a list of the cards sorted from greatest to least*)
+let card_sort clist =
+  let compare_helper card1 card2 =
+    let p1 = card_to_points card1 in
+    let p2 = card_to_points card2 in
+    if p1=p2 then 0
+    else if p1 > p2 then (-1) else 1 in
+  List.sort compare_helper clist
+
+
+(*Returns true if a a 5 card hand is a flush*)
+let is_flush (clist:card list) : bool =
   let rec helper cards s =
     match cards with
       | [] -> true
@@ -71,3 +176,91 @@ let is_flush clist =
 
   helper clist ((List.hd clist).suit)
 
+(*Returns true if a a 5 card hand is a straight*)
+let is_straight (clist:card list) : bool =
+  let sorted_ints = cardlist_to_points (card_sort clist) in
+  let rec helper lst =
+    match lst with
+      | h::m::t -> if h-m = 1 then helper (m::t) else false
+      | _ -> true
+  in helper sorted_ints
+
+
+(*If the 5 card list is a straight flush, return Some Straightflush
+  else return None*)
+let make_straight_flush (clist:card list) : hand option  =
+  if (is_flush clist) && (is_straight clist) then
+    let first = (List.hd (card_sort clist)) in
+    Some (Straightflush(first.suit, first))
+  else None
+
+
+(*If the 5 card list is a four of a kind, return Some Fourofkind
+  else return None*)
+let make_four_kind (clist:card list) : hand option  =
+  let sorted = card_sort clist in
+  if ((List.nth sorted 0) = (List.nth sorted 1) && (List.nth sorted 1) =
+     (List.nth sorted 2) && (List.nth sorted 2) = (List.nth sorted 3)) ||
+     ((List.nth sorted 1) = (List.nth sorted 2) && (List.nth sorted 2) =
+     (List.nth sorted 3) && (List.nth sorted 3) = (List.nth sorted 4))
+  then Some (Fourofkind ((List.nth sorted 4), (List.hd sorted)))
+  else None
+
+(*If the 5 card list is a full house, return Some Fullhouse
+  else return None*)
+let make_full_house (clist:card list) : hand option  =
+  failwith "TODO"
+
+(*If the 5 card list is a flush, return Some Flush
+  else return None*)
+let make_flush (clist:card list) : hand option  =
+  failwith "TODO"
+
+(*If the 5 card list is a straight, return Some Straight
+  else return None*)
+let make_straight (clist:card list) : hand option  =
+  failwith "TODO"
+
+(*If the 5 card list is a three of a kind, return Some Threeofkind
+  else return None*)
+let make_three_kind (clist:card list) : hand option  =
+  failwith "TODO"
+
+(*If the 5 card list is a two pair, return Some Twopair
+  else return None*)
+let make_two_pair (clist:card list) : hand option  =
+  failwith "TODO"
+
+(*If the 5 card list is a one pair, return Some Onepair
+  else return None*)
+let make_one_pair (clist:card list) : hand option  =
+  failwith "TODO"
+
+
+
+(*Takes a list of 5 cards and returns a corresponding hand representation*)
+let cardlist_to_hand (clist: card list): hand =
+  match (make_straight_flush clist) with
+    | Some x -> x
+    | None ->
+       (match (make_four_kind clist) with
+         | Some x -> x
+         | None ->
+            (match (make_full_house clist) with
+              | Some x -> x
+              | None ->
+                (match (make_flush clist) with
+                  | Some x -> x
+                  | None ->
+                    (match (make_straight clist) with
+                       | Some x -> x
+                       | None ->
+                          (match (make_three_kind clist) with
+                             | Some x -> x
+                             | None ->
+                                 (match (make_two_pair clist) with
+                                   | Some x -> x
+                                   | None ->
+                                      (match (make_one_pair clist) with
+                                        | Some x -> x
+                                        | None -> Highcard (card_sort clist))))))))
