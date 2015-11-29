@@ -28,10 +28,11 @@ type hand =
   | Onepair of card * (card list)
   | Highcard of card list
 
-
+(*Takes a list of cards and returns the best 5 card combination*)
 let best_hand clist =
-  (*Create all 5 card combinations as a card list list
-    * List.fold_left (fun x acc -> if (compare x acc) = 1 then x else acc) clist)
+  (*Cite: code for extract used from 99 Real OCaml Problems
+    *The code functionally gives all the combinations
+    *of length of clist choose k.
   *)
   let extract k list =
     let rec aux k acc emit = function
@@ -48,11 +49,7 @@ let best_hand clist =
   let combos = extract 5 clist in
   List.fold_left (fun acc x -> if (compare x acc) = 1 then x else acc) (List.hd combos) combos
 
-(*This function is not really needed, we could take it out of the
-mli and instead put compare and cardlist_to_hand in it*)
-let hand_value clist =
-  failwith "TODO"
-
+(*Returns true if hand one is better than hand two*)
 let is_better_hand clist1 clist2 =
   let comp = compare clist1 clist2 in
   if comp = 1 then true else false
@@ -89,7 +86,8 @@ let rec cardlistcompare lst1 lst2 =
                        else cardlistcompare t t'
   | (_,_) -> failwith "precondition: the list are of the same length"
 
-(*returns 1 if first hand is larger, 0 if equal, -1 if smaller*)
+(*returns 1 if first hand is better, 0 if equal, -1 if worse
+based on standard texas hold'em rules*)
 let compare (firsthand :hand) (secondhand: hand) =
   let number = card_to_points in
   match firsthand with
