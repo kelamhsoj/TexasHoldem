@@ -509,19 +509,91 @@ let hand = [{suit = Heart; value = Nine}; {suit = Heart; value = Jack} ;
             {suit = Heart; value = King}] in
 let fail = make_straight_flush hand in
 fail === None
-(*
+
+(*three kind*)
+TEST_UNIT=
+let hand = [{suit = Diamond; value = Nine}; {suit = Heart; value = Eight} ;
+            {suit = Club; value = Nine};  {suit = Spade; value = Nine};
+            {suit = Spade; value = Eight}] in
+let three = make_three_kind hand in
+(match three with
+ | Some (Threeofkind(triple, kickers)) -> triple.value === Nine;
+                                    (cardlist_to_points kickers) === [8;8]
+ | _ -> true === false)
+
+TEST_UNIT=
+let hand = [{suit = Diamond; value = Ten}; {suit = Heart; value = Nine} ;
+            {suit = Club; value = Nine};  {suit = Spade; value = Nine};
+            {suit = Spade; value = Eight}] in
+let three = make_three_kind hand in
+(match three with
+ | Some (Threeofkind (triple, kickers)) -> triple.value === Nine;
+                                    (cardlist_to_points kickers) === [10;8]
+ | _ -> true === false)
+
+TEST_UNIT=
+let hand = [{suit = Diamond; value = Two}; {suit = Heart; value = Three} ;
+            {suit = Club; value = Four};  {suit = Spade; value = Eight};
+            {suit = Spade; value = Eight}] in
+let three = make_three_kind hand in
+three === None
 (*two pair*)
 TEST_UNIT=
+let hand = [{suit = Diamond; value = Nine}; {suit = Heart; value = Eight} ;
+            {suit = Club; value = Nine};  {suit = Spade; value = Ten};
+            {suit = Spade; value = Eight}] in
+let double = make_two_pair hand in
+(match double with
+ | Some (Twopair (pair1,pair2,kicker)) -> pair1.value === Nine;
+                                          pair2.value === Eight;
+                                          kicker === {suit = Spade; value = Ten}
+ | _ -> true === false)
+
 TEST_UNIT=
+let hand = [{suit = Diamond; value = Ace}; {suit = Heart; value = Ace} ;
+            {suit = Club; value = Ace};  {suit = Spade; value = Ace};
+            {suit = Spade; value = Nine}] in
+let double = make_two_pair hand in
+(match double with
+ | Some (Twopair (pair1, pair2, kicker)) -> pair1.value === Ace;
+                                            pair2.value === Ace;
+                                            kicker === {suit = Spade; value = Nine}
+ | _ -> true === false)
+
 TEST_UNIT=
+let hand = [{suit = Diamond; value = Ace}; {suit = Heart; value = Ace} ;
+            {suit = Club; value = Four};  {suit = Spade; value = Five};
+            {suit = Spade; value = Nine}] in
+let fail = make_two_pair hand in
+fail === None
+TEST_UNIT=
+let hand = [{suit = Diamond; value = Ace}; {suit = Heart; value = Ace} ;
+            {suit = Club; value = Four};  {suit = Spade; value = Four};
+            {suit = Spade; value = Ace}] in
+let double = make_two_pair hand in
+(match double with
+ | Some (Twopair (pair1, pair2, kicker)) -> pair1.value === Ace;
+                                            pair2.value === Four;
+                                            kicker.value === Ace
+ | _ -> true === false)
 (*one pair*)
 TEST_UNIT=
-TEST_UNIT=
-TEST_UNIT=
-(*high card*)
-TEST_UNIT=
-TEST_UNIT=
-TEST_UNIT=
-*)
+let hand = [{suit = Diamond; value = Ace}; {suit = Heart; value = Ace} ;
+            {suit = Club; value = Four};  {suit = Spade; value = Five};
+            {suit = Spade; value = Nine}] in
+let one = make_one_pair hand in
+(match one with
+ | Some (Onepair (c, clist)) -> c.value === Ace;
+                                clist ===
+                                [{suit = Spade; value = Nine};
+                                {suit = Spade; value = Five};
+                                {suit = Club; value = Four}]
+ | _ -> true === false)
 
+TEST_UNIT=
+let hand = [{suit = Diamond; value = Ace}; {suit = Heart; value = Three} ;
+           {suit = Club; value = Four};  {suit = Spade; value = Five};
+           {suit = Spade; value = Nine}] in
+let one = make_one_pair hand in
+one === None
 end
