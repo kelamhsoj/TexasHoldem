@@ -198,12 +198,14 @@ let make_straight_flush (clist:card list) : hand option  =
   else return None*)
 let make_four_kind (clist:card list) : hand option  =
   let sorted = card_sort clist in
-  if ((List.nth sorted 0) = (List.nth sorted 1) && (List.nth sorted 1) =
-     (List.nth sorted 2) && (List.nth sorted 2) = (List.nth sorted 3))
+  if ((List.nth sorted 0).value = (List.nth sorted 1).value &&
+      (List.nth sorted 1).value = (List.nth sorted 2).value &&
+      (List.nth sorted 2).value = (List.nth sorted 3).value)
   then Some (Fourofkind ((List.hd sorted),(List.nth sorted 4)))
   else
-     if ((List.nth sorted 1) = (List.nth sorted 2) && (List.nth sorted 2) =
-     (List.nth sorted 3) && (List.nth sorted 3) = (List.nth sorted 4))
+     if ((List.nth sorted 1).value = (List.nth sorted 2).value &&
+         (List.nth sorted 2).value = (List.nth sorted 3).value &&
+         (List.nth sorted 3).value = (List.nth sorted 4).value)
      then Some (Fourofkind ((List.nth sorted 4), (List.hd sorted)))
      else None
 
@@ -211,12 +213,14 @@ let make_four_kind (clist:card list) : hand option  =
   else return None*)
 let make_full_house (clist:card list) : hand option  =
   let sorted = card_sort clist in
-  if ((List.nth sorted 0) = (List.nth sorted 1) && (List.nth sorted 1) =
-     (List.nth sorted 2) && (List.nth sorted 3) = (List.nth sorted 4))
+  if ((List.nth sorted 0).value = (List.nth sorted 1).value &&
+      (List.nth sorted 1).value = (List.nth sorted 2).value &&
+      (List.nth sorted 3).value = (List.nth sorted 4).value)
   then Some (Fullhouse ((List.nth sorted 0),(List.nth sorted 3)))
   else
-      if ((List.nth sorted 0) = (List.nth sorted 1) && (List.nth sorted 2) =
-      (List.nth sorted 3) && (List.nth sorted 3) = (List.nth sorted 4))
+      if ((List.nth sorted 0).value = (List.nth sorted 1).value &&
+          (List.nth sorted 2).value = (List.nth sorted 3).value &&
+          (List.nth sorted 3).value = (List.nth sorted 4).value)
       then Some (Fullhouse ((List.nth sorted 2),(List.nth sorted 0)))
       else None
 
@@ -239,18 +243,18 @@ let make_straight (clist:card list) : hand option  =
   else return None*)
 let make_three_kind (clist:card list) : hand option  =
   let sorted = card_sort clist in
-  if (List.nth sorted 0) = (List.nth sorted 1) && (List.nth sorted 1) =
-      (List.nth sorted 2)
+  if (List.nth sorted 0).value = (List.nth sorted 1).value &&
+  (List.nth sorted 1).value = (List.nth sorted 2).value
   then Some (Threeofkind ((List.nth sorted 0),
             [(List.nth sorted 3); (List.nth sorted 4)] ))
   else
-      if (List.nth sorted 1) = (List.nth sorted 2) && (List.nth sorted 2) =
-        (List.nth sorted 3)
+      if (List.nth sorted 1).value = (List.nth sorted 2).value &&
+      (List.nth sorted 2).value = (List.nth sorted 3).value
       then Some (Threeofkind ((List.nth sorted 1),
                   [(List.nth sorted 0); (List.nth sorted 4)] ))
       else
-          if (List.nth sorted 2) = (List.nth sorted 3) && (List.nth sorted 3) =
-             (List.nth sorted 4)
+          if (List.nth sorted 2).value = (List.nth sorted 3).value &&
+          (List.nth sorted 3).value = (List.nth sorted 4).value
           then Some (Threeofkind ((List.nth sorted 2),
                   [(List.nth sorted 0); (List.nth sorted 1)] ))
           else None
@@ -259,18 +263,18 @@ let make_three_kind (clist:card list) : hand option  =
   else return None*)
 let make_two_pair (clist:card list) : hand option  =
   let sorted = card_sort clist in
-  if (List.nth sorted 0) = (List.nth sorted 1) && (List.nth sorted 2) =
-      (List.nth sorted 3)
+  if (List.nth sorted 0).value = (List.nth sorted 1).value &&
+  (List.nth sorted 2).value = (List.nth sorted 3).value
   then Some (Twopair ((List.nth sorted 0), (List.nth sorted 2),
                      (List.nth sorted 4)))
   else
-      if (List.nth sorted 1) = (List.nth sorted 2) && (List.nth sorted 3) =
-        (List.nth sorted 4)
+      if (List.nth sorted 1).value = (List.nth sorted 2).value &&
+      (List.nth sorted 3).value = (List.nth sorted 4).value
       then Some (Twopair ((List.nth sorted 1), (List.nth sorted 3),
                      (List.nth sorted 0)))
       else
-          if (List.nth sorted 0) = (List.nth sorted 1) && (List.nth sorted 3) =
-             (List.nth sorted 4)
+          if (List.nth sorted 0).value = (List.nth sorted 1).value &&
+          (List.nth sorted 3).value = (List.nth sorted 4).value
           then Some (Twopair ((List.nth sorted 0), (List.nth sorted 3),
                      (List.nth sorted 2)))
           else None
@@ -279,19 +283,19 @@ let make_two_pair (clist:card list) : hand option  =
   else return None*)
 let make_one_pair (clist:card list) : hand option  =
   let sorted = card_sort clist in
-  if (List.nth sorted 0) = (List.nth sorted 1)
+  if (List.nth sorted 0).value = (List.nth sorted 1).value
   then Some (Onepair ((List.nth sorted 0),
             [(List.nth sorted 2); (List.nth sorted 3); (List.nth sorted 4)] ))
   else
-      if (List.nth sorted 1) = (List.nth sorted 2)
+      if (List.nth sorted 1).value = (List.nth sorted 2).value
       then Some (Onepair ((List.nth sorted 1),
             [(List.nth sorted 0); (List.nth sorted 3); (List.nth sorted 4)] ))
       else
-          if (List.nth sorted 2) = (List.nth sorted 3)
+          if (List.nth sorted 2).value = (List.nth sorted 3).value
           then Some (Onepair ((List.nth sorted 2),
             [(List.nth sorted 0); (List.nth sorted 1); (List.nth sorted 4)] ))
           else
-              if (List.nth sorted 3) = (List.nth sorted 4)
+              if (List.nth sorted 3).value = (List.nth sorted 4).value
               then Some (Onepair ((List.nth sorted 3),
                [(List.nth sorted 0); (List.nth sorted 1); (List.nth sorted 2)]))
               else None
