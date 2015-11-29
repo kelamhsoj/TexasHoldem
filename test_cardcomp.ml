@@ -2,9 +2,10 @@ open Cardcomp
 open Assertions
 open Deck
 
-(*TESTING HELPER FUNCTIONS. THESE ONLY TAKE 5 CARDS*)
+(*TESTING OF HELPER FUNCTIONS, THE ONLY ONES THAT TAKE 5 CARDS OCCURS
+ * IN CARDCOMP SINCE HELPER FUNCTIONS ARE HIDDEN *)
 (*conversion to number ok?*)
-TEST_UNIT= 
+TEST_UNIT=
 let card = {suit = Diamond; value = Two} in
 let result = card_to_points card in
 result === 2;
@@ -22,14 +23,15 @@ let result = [{suit = Heart; value = Six}; {suit = Heart; value = Five} ;
               {suit = Heart; value = Two}] in
 sorted_hand === result
 
-TEST_UNIT= 
+TEST_UNIT=
 let hand = [{suit = Heart; value = Ace};   {suit = Heart; value = Ten}  ;
             {suit = Heart; value = Eight}; {suit = Heart; value = King} ;
             {suit = Heart; value = Five}] in
 let sorted_hand = card_sort hand in
 let result = [{suit = Heart; value = Ace}; {suit = Heart; value = King}  ;
             {suit = Heart; value = Ten};   {suit = Heart; value = Eight} ;
-            {suit = Heart; value = Five}]
+            {suit = Heart; value = Five}] in
+sorted_hand === result
 (*Does it make straights ok?*)
 TEST_UNIT=
 let hand = [{suit = Heart; value = Two};   {suit = Heart; value = Three} ;
@@ -37,8 +39,8 @@ let hand = [{suit = Heart; value = Two};   {suit = Heart; value = Three} ;
             {suit = Heart; value = Six}] in
 let straight = make_straight hand in
 let fourkind = make_four_kind hand in
-fourkind === None; 
-straight === Some( Straight ({suit = Heart; value = Six}) );
+fourkind === None;
+straight === Some( Straight ({suit = Heart; value = Six}) )
 
 TEST_UNIT=
 let hand = [{suit = Club; value = Ten};   {suit = Heart; value = King} ;
@@ -55,7 +57,7 @@ TEST_UNIT=
 let hand = [{suit = Club; value = Ten};   {suit = Heart; value = King} ;
             {suit = Spade; value = Queen};  {suit = Heart; value = Jack}  ;
             {suit = Diamond; value = Eight}] in
-let straight = make_straight hand in 
+let straight = make_straight hand in
 straight === None
 
 TEST_UNIT=
@@ -69,19 +71,19 @@ TEST_UNIT=
 let hand = [{suit = Heart; value = Ace};   {suit = Heart; value = Ten}  ;
             {suit = Heart; value = Eight}; {suit = Heart; value = King} ;
             {suit = Heart; value = Five}] in
-let heart_flush = make_flush hand in 
+let heart_flush = make_flush hand in
 heart_flush === Some ( Flush (Heart,
 	       [{suit = Heart; value = Ace};   {suit = Heart; value = King}  ;
             {suit = Heart; value = Ten}; {suit = Heart; value = Eight} ;
-            {suit = Heart; value = Five}]) ) 
+            {suit = Heart; value = Five}]) )
 
 TEST_UNIT=
 let hand = [{suit = Club; value = Ace};   {suit = Club; value = Ten}  ;
             {suit = Club; value = Eight}; {suit = Club; value = King} ;
             {suit = Club; value = Five}] in
 let club_flush = make_flush hand in
-club_flush === Some ( Flush (Club, 
-	       [{suit = Club; value = Ace};   {suit = Club; value = King}  ;
+club_flush === Some ( Flush (Club,
+	         [{suit = Club; value = Ace};   {suit = Club; value = King}  ;
             {suit = Club; value = Ten}; {suit = Club; value = Eight} ;
             {suit = Club; value = Five}]) )
 
@@ -94,18 +96,18 @@ fail === None
 
 (*does it make full_house ok?*)
 TEST_UNIT=
-let hand = [{suit = Heart; value = Ten }; {suit = Club; value = Ten} ; 
-            {suit = Diamond; value = Ten}; {suit = Spade; value = Ace} ; 
+let hand = [{suit = Heart; value = Ten }; {suit = Club; value = Ten} ;
+            {suit = Diamond; value = Ten}; {suit = Spade; value = Ace} ;
             {suit = Club; value = Ace}] in
-let simple_test = make_full_house hand in 
+let simple_test = make_full_house hand in
 (match simple_test with
  | Some (Fullhouse (triple, pair)) -> triple.value === Ten;
                                       pair.value === Ace
  | None -> true===false)
 
 TEST_UNIT=
-let hand = [{suit = Heart; value = Ace }; {suit = Club; value = Ace} ; 
-            {suit = Diamond; value = Ace}; {suit = Spade; value = Ten} ; 
+let hand = [{suit = Heart; value = Ace }; {suit = Club; value = Ace} ;
+            {suit = Diamond; value = Ace}; {suit = Spade; value = Ten} ;
             {suit = Club; value = Ten}] in
 let simple_test2 = make_full_house hand in
 (match simple_test2 with
@@ -114,26 +116,26 @@ let simple_test2 = make_full_house hand in
  | None -> true === false)
 
 TEST_UNIT=
-let hand = [{suit = Heart; value = Ace }; {suit = Club; value = Ace} ; 
-            {suit = Diamond; value = Ace}; {suit = Spade; value = Ace} ; 
+let hand = [{suit = Heart; value = Ace }; {suit = Club; value = Ace} ;
+            {suit = Diamond; value = Ace}; {suit = Spade; value = Ace} ;
             {suit = Club; value = Ten}] in
 let fail = make_full_house hand in
 fail === None
 
 (*does it make 4-kind ok?*)
 TEST_UNIT=
-let hand = [{suit = Heart; value = Ace }; {suit = Club; value = Ace} ; 
-            {suit = Diamond; value = Ace}; {suit = Spade; value = Ace} ; 
+let hand = [{suit = Heart; value = Ace }; {suit = Club; value = Ace} ;
+            {suit = Diamond; value = Ace}; {suit = Spade; value = Ace} ;
             {suit = Club; value = Ten}] in
-let fourkind = make_four_kind hand in 
+let fourkind = make_four_kind hand in
 (match fourkind with
  | Some (Fourofkind (four, single)) -> four.value === Ace;
                                        single.value === Ten;
  | None -> true === false)
 
-TEST_UNIT=  
-let hand = [{suit = Heart; value = Two }; {suit = Club; value = Two} ; 
-            {suit = Diamond; value = Two}; {suit = Spade; value = Two} ; 
+TEST_UNIT=
+let hand = [{suit = Heart; value = Two }; {suit = Club; value = Two} ;
+            {suit = Diamond; value = Two}; {suit = Spade; value = Two} ;
             {suit = Club; value = Ten}] in
 let fourkind = make_four_kind hand in
 (match fourkind with
@@ -142,10 +144,10 @@ let fourkind = make_four_kind hand in
  | None -> true === false)
 
 TEST_UNIT=
-let hand = [{suit = Heart; value = Ace }; {suit = Club; value = Ace} ; 
-            {suit = Diamond; value = Ace}; {suit = Spade; value = Ten} ; 
+let hand = [{suit = Heart; value = Ace }; {suit = Club; value = Ace} ;
+            {suit = Diamond; value = Ace}; {suit = Spade; value = Ten} ;
             {suit = Club; value = Ten}] in
-let fourkind = make_four_kind hand in 
+let fourkind = make_four_kind hand in
 fourkind === None
 
 (*what about straight flush?*)
@@ -154,7 +156,7 @@ let hand = [{suit = Heart; value = Three}; {suit = Heart; value = Four} ;
             {suit = Heart; value = Six};   {suit = Heart; value = Two}  ;
             {suit = Heart; value = Five}] in
 let straight = make_straight hand in
-let flush = make_flush hand in 
+let flush = make_flush hand in
 let straightflush = make_straight_flush hand in
 (match (straight, flush, straightflush) with
  | (Some _, Some _, Some (_,c)) -> c.value === Six
@@ -165,7 +167,7 @@ let hand = [{suit = Heart; value = Ten}; {suit = Heart; value = Jack} ;
             {suit = Heart; value = Ace};   {suit = Heart; value = Queen}  ;
             {suit = Heart; value = King}] in
 let straight = make_straight hand in
-let flush = make_flush hand in 
+let flush = make_flush hand in
 let straightflush = make_straight_flush hand in
 (match (straight, flush, straightflush) with
  | (Some _, Some _, Some (_, c)) -> c.value === Ace
@@ -173,13 +175,14 @@ let straightflush = make_straight_flush hand in
 
 TEST_UNIT=
 let hand = [{suit = Heart; value = Ten}; {suit = Heart; value = Jack} ;
-            {suit = Heart; value = Ace};   {suit = Heart; value = Queen}  ;
+            {suit = Heart; value = Ace}; {suit = Heart; value = Queen};
             {suit = Club; value = King}] in
 let fail = make_straight_flush hand in
 fail === None
 
-TEST_UNIT= [{suit = Heart; value = Nine}; {suit = Heart; value = Jack} ;
-            {suit = Heart; value = Ace};   {suit = Heart; value = Queen}  ;
+TEST_UNIT=
+let hand = [{suit = Heart; value = Nine}; {suit = Heart; value = Jack} ;
+            {suit = Heart; value = Ace};  {suit = Heart; value = Queen};
             {suit = Heart; value = King}] in
 let fail = make_straight_flush hand in
 fail === None
