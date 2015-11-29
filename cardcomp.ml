@@ -30,13 +30,32 @@ type hand =
 
 
 let best_hand clist =
-  failwith "TODO"
+  (*Create all 5 card combinations as a card list list
+    * List.fold_left (fun x acc -> if (compare x acc) = 1 then x else acc) clist)
+  *)
+  let extract k list =
+    let rec aux k acc emit = function
+      | [] -> acc
+      | h :: t ->
+        if k = 1 then aux k (emit [h] acc) emit t else
+          let new_emit x = emit (h :: x) in
+          aux k (aux (k-1) acc new_emit t) emit t
+    in
+    let emit x acc = x :: acc in
+    aux k [] emit list
+  in
 
+  let combos = extract 5 clist in
+  List.fold_left (fun acc x -> if (compare x acc) = 1 then x else acc) (List.hd combos) combos
+
+(*This function is not really needed, we could take it out of the
+mli and instead put compare and cardlist_to_hand in it*)
 let hand_value clist =
   failwith "TODO"
 
 let is_better_hand clist1 clist2 =
-  failwith "TODO"
+  let comp = compare clist1 clist2 in
+  if comp = 1 then true else false
 
 (*Turns a card to an integer value based on its value *)
 let card_to_points  (c:card) : int =
