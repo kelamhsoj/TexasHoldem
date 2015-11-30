@@ -1,5 +1,16 @@
 open Deck
 
+type hand =
+  | Straightflush of suits*card
+  | Fourofkind of card*card
+  | Fullhouse of card*card
+  | Flush of suits *(card list)
+  | Straight of card
+  | Threeofkind of card*(card list)
+  | Twopair of card * card * card
+  | Onepair of card * (card list)
+  | Highcard of card list
+
 (*Takes a list of cards and returns the best 5 card combination*)
 val best_hand: card list -> card list
 
