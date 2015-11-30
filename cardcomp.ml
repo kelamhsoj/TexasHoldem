@@ -28,32 +28,6 @@ type hand =
   | Onepair of card * (card list)
   | Highcard of card list
 
-(*Takes a list of cards and returns the best 5 card combination*)
-let best_hand clist =
-  (*Cite: code for extract used from 99 Real OCaml Problems
-    *The code functionally gives all the combinations
-    *of length of clist choose k.
-  *)
-  let extract k list =
-    let rec aux k acc emit = function
-      | [] -> acc
-      | h :: t ->
-        if k = 1 then aux k (emit [h] acc) emit t else
-          let new_emit x = emit (h :: x) in
-          aux k (aux (k-1) acc new_emit t) emit t
-    in
-    let emit x acc = x :: acc in
-    aux k [] emit list
-  in
-
-  let combos = extract 5 clist in
-  List.fold_left (fun acc x -> if (compare x acc) = 1 then x else acc) (List.hd combos) combos
-
-(*Returns true if hand one is better than hand two*)
-let is_better_hand clist1 clist2 =
-  let comp = compare clist1 clist2 in
-  if comp = 1 then true else false
-
 (*Turns a card to an integer value based on its value *)
 let card_to_points  (c:card) : int =
   match c.value with
@@ -88,7 +62,7 @@ let rec cardlistcompare lst1 lst2 =
 
 (*returns 1 if first hand is better, 0 if equal, -1 if worse
 based on standard texas hold'em rules*)
-let compare (firsthand :hand) (secondhand: hand) =
+let comparing (firsthand :hand) (secondhand: hand) =
   let number = card_to_points in
   match firsthand with
   | Straightflush (_,c) ->
@@ -344,6 +318,39 @@ let cardlist_to_hand (clist: card list): hand =
                                       (match (make_one_pair clist) with
                                         | Some x -> x
                                         | None -> Highcard (card_sort clist))))))))
+(* changes the list of cards into hand combinations based on the rules of
+ * Texas Hold'em *)
+let rec create_hand_list = function
+  | []-> []
+  | h::t -> (cardlist_to_hand h) :: (create_hand_list t)
+(* finds the maximum *)
+let rec max = function
+  | [x] -> x
+  | h::h1::t -> if (comparing h h1) > 0 then max (h::t)
+                else max(h1::t)
+  | _ -> failwith "preconditions violated"
+(* Takes a list of cards and returns the best hand out of all the possible
+ * combinations *)
+
+let best_hand clist =
+  (* Cite: code for extract used from 99 Real OCaml Problems
+   *The code functionally gives all the combinations
+   *of length of clist choose k.*)
+  let extract k lst =
+    let rec aux k acc emit = function
+      | [] -> acc
+      | h :: t ->
+          if k = 1 then aux k (emit [h] acc) emit t else
+          let new_emit x = emit (h :: x) in
+          aux k (aux (k-1) acc new_emit t) emit t in
+    let emit x acc = x :: acc in
+    aux k [] emit lst
+  in
+
+  let all_combos = extract 5 clist in
+  let hand_lst = create_hand_list all_combos in
+  max hand_lst
+
 (*=================================================================================*)
 
 TEST_MODULE "helper_functions" = struct

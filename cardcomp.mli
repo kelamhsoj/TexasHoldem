@@ -1,5 +1,6 @@
 open Deck
 
+(*The possible type 5 cards combination can result in.*)
 type hand =
   | Straightflush of suits*card
   | Fourofkind of card*card
@@ -12,8 +13,8 @@ type hand =
   | Highcard of card list
 
 (*Takes a list of cards and returns the best 5 card combination*)
-val best_hand: card list -> card list
+val best_hand: card list -> hand
 
 (*returns 1 if first hand is better, 0 if equal, -1 if worse
 based on standard texas hold'em rules*)
-val compare: card list -> card list -> int
+val comparing: hand -> hand -> int
