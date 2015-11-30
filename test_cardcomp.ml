@@ -7,6 +7,7 @@ open Cardcomp
 open Assertions
 open Deck
 
+(*TEST UNITS FOR BEST_HAND*)
 TEST_UNIT=
 (*Try with basic 5, multiple different hands*)
 let hand = [{suit = Heart; value = Three}; {suit = Heart; value = Four} ;
@@ -191,12 +192,122 @@ match high with
                            {suit = Diamond; value = Seven};
                            {suit = Club; value = Five}]
 | _ -> true === false
-(*
-(*comparison of different hands goes here.*)
+
+(*=============================================================================
+TEST UNITS FOR COMPARING*)
+
+(*Basic Equal Onepairs*)
 TEST_UNIT=
+let hand1 = Onepair({suit = Heart; value = Ace}, [{suit = Spade; value = King};
+            {suit = Heart; value = Ten}; {suit = Diamond; value = Seven};]) in
+let hand2 = Onepair ({suit = Spade; value = Ace}, [{suit = Spade; value = King};
+            {suit = Heart; value = Ten}; {suit = Heart; value = Seven};]) in
+comparing hand1 hand2 === 0
+
+(*Royal Flush Equals Royal Flush of different suit*)
+TEST_UNIT =
+let hand1 = Straightflush (Heart, {suit= Heart; value = Ace}) in
+let hand2 = Straightflush (Spade, {suit= Spade; value = Ace}) in
+comparing hand1 hand2 === 0
+
+(*Royal Flush > Straight Flush*)
+TEST_UNIT =
+let hand1 = Straightflush (Heart, {suit= Heart; value = Ace}) in
+let hand2 = Straightflush (Spade, {suit= Spade; value = King}) in
+comparing hand1 hand2 === 1
+
+(*Threeofkind < Threeofkind of higher value*)
+TEST_UNIT =
+let hand1 = Threeofkind({suit=Heart; value = Five}, [{suit= Spade; value =Ace};
+               {suit = Spade; value = King}]) in
+let hand2 = Threeofkind({suit=Heart; value = Seven}, [{suit= Spade; value =Two};
+               {suit = Diamond; value = Three}]) in
+comparing hand1 hand2 === -1
+
+
+(*Twopair> lower value twopair*)
+TEST_UNIT =
+let hand1 = Twopair({suit= Heart; value = Queen},{suit= Club; value = Jack},
+                    {suit = Spade; value = Two}) in
+let hand2 = Twopair({suit= Spade; value = Queen},{suit= Club; value = Ten},
+                    {suit = Club; value = Two}) in
+comparing hand1 hand2 === 1
+
+(*Twopair< same twopair with better fifth card*)
+TEST_UNIT =
+let hand1 = Twopair({suit= Heart; value = Queen},{suit= Club; value = Jack},
+                    {suit = Spade; value = Two}) in
+let hand2 = Twopair({suit= Spade; value = Queen},{suit= Spade; value = Jack},
+                    {suit = Club; value = Three}) in
+comparing hand1 hand2 === -1
+
+
+(*Full house of weak cards  > Threeofkind of strong cards*)
+TEST_UNIT =
+let hand1 = Fullhouse({suit= Heart; value=Two},{suit = Diamond;value=Three}) in
+let hand2 = Threeofkind({suit=Heart; value = Ace}, [{suit= Spade; value =King};
+               {suit = Spade; value = Queen}]) in
+comparing hand1 hand2 === 1
+
+(*Highcard comparison based on lowest cards*)
+TEST_UNIT =
+let hand1 = Highcard [{suit = Heart; value = Ace}; {suit = Spade; value = King};
+                {suit = Heart; value = Ten}; {suit = Diamond; value = Seven};
+                {suit = Club; value = Five}] in
+let hand2 = Highcard [{suit =Diamond; value = Ace}; {suit =Club; value = King};
+                {suit = Spade; value = Ten}; {suit = Club; value = Seven};
+                {suit = Club; value = Six}] in
+comparing hand1 hand2 === -1
+
+(*Flush > Straight*)
+TEST_UNIT =
+let hand1 = Flush (Heart,[{suit = Heart; value = Two};
+              {suit = Heart; value = Three}; {suit = Heart; value = Five};
+              {suit = Heart; value = Six}; {suit = Heart; value = Seven}]) in
+let hand2 = Straight {suit = Spade; value = Ace} in
+comparing hand1 hand2 === 1
+
+(*Flush < Flush with better highest card*)
 TEST_UNIT=
+let hand1 = Flush (Heart,[{suit = Heart; value = Two};
+              {suit = Heart; value = Three}; {suit = Heart; value = Five};
+              {suit = Heart; value = Six}; {suit = Heart; value = Seven}]) in
+let hand2 = Flush (Spade,[{suit = Spade; value = Two};
+              {suit = Spade; value = Three}; {suit = Spade; value = Five};
+              {suit = Spade; value = Six}; {suit = Spade; value = Eight}]) in
+comparing hand1 hand2 === -1
+
+(*Flush > Flush with worse last card*)
 TEST_UNIT=
-TEST_UNIT=
-TEST_UNIT=
-*)
+let hand1 = Flush (Heart,[{suit = Heart; value = Ten};
+              {suit = Heart; value = Three}; {suit = Heart; value = Five};
+              {suit = Heart; value = Six}; {suit = Heart; value = Seven}]) in
+let hand2 = Flush (Spade,[{suit = Spade; value = Ten};
+              {suit = Spade; value = Two}; {suit = Spade; value = Five};
+              {suit = Spade; value = Six}; {suit = Spade; value = Seven}]) in
+comparing hand1 hand2 === 1
+
+
+(*Twopair>Onepair*)
+TEST_UNIT =
+let hand1 =Twopair({suit= Heart; value = Three},{suit= Club; value = Two},
+                    {suit = Spade; value = Four}) in
+let hand2 =Onepair({suit = Heart; value = Ace}, [{suit = Spade; value = King};
+            {suit = Heart; value = Ten}; {suit = Diamond; value = Seven};]) in
+comparing hand1 hand2 === 1
+
+(*Equal Onepairs with different kickers*)
+TEST_UNIT =
+let hand1 =Onepair({suit = Heart; value = Ace}, [{suit = Spade; value = King};
+            {suit = Heart; value = Ten}; {suit = Diamond; value = Seven};]) in
+let hand2 =Onepair({suit = Diamond; value = Ace}, [{suit = Heart; value = King};
+            {suit = Club; value = Ten}; {suit = Diamond; value = Eight};]) in
+comparing hand1 hand2 === -1
+
+(*Equal Straights*)
+TEST_UNIT =
+let hand1 = Straight {suit = Spade; value = King} in
+let hand2 = Straight {suit = Heart; value = King} in
+comparing hand1 hand2 === 0
+
 end
