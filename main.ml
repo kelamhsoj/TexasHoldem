@@ -3,8 +3,8 @@ open Deck
 open Ai
 
 type gamestate = {dealer: int; mutable pot: int;
-      mutable scores:int ref list; deck: deck;
-      table: card list; mutable hands: (card*card) list;
+      scores:int ref list; deck: deck;
+      mutable table: card list; mutable hands: (card*card) list;
       mutable players: int list; bets: int ref list}
 (*Players are numbered 0 through n-1 where n is the total number of players*)
 
@@ -12,6 +12,11 @@ let rec printcardlist = function
   | [] -> ()
   | h::t -> printcard (fst h); print_string ", "; printcard (snd h);
             print_newline (); printcardlist t
+
+let rec printintlist = function
+  | [] -> ()
+  | h::t -> print_string (string_of_int h); print_newline ();
+            printintlist t
 
 let printgame (g: gamestate): unit =
   match (List.length g.table) with
@@ -39,34 +44,11 @@ let betfunction (g: gamestate) (bet: int) (player: int) =
   (List.nth g.bets player) := currentbet + bet
 
 let nextplayer (g: gamestate) (i:int): int =
-  if (i+1) = (List.length g.players) then 0 else (i + 1)
-
-let fold (g: gamestate) (i: int): unit =
-  if List.mem i g.players then
-    let newplayers = List.filter ((<>) i) g.players in
-    g.players <- newplayers
-  else failwith ("Player " ^ string_of_int i ^ " cannot fold")
+  if (i+1) >= (List.length g.players) then 0 else (i + 1)
 
 let createlist h tab =
   match h with
   | (x, y) -> x::y::tab
-
-let rec askaround (g: gamestate) (init: int) (i: int) (bet: int): unit =
-  let looped = ref false in
-  while !looped = false do
-    let hand = List.nth g.hands i in
-    match (Ai.decision (createlist hand []) bet) with
-    | Fold -> fold g i;
-              let newi = nextplayer g i in
-              if newi = init then looped := true
-              else askaround g init newi bet
-    | Call -> let newbet = (bet - !(List.nth g.bets i)) in
-              betfunction g newbet i;
-              let newi = nextplayer g i in
-              if newi = init then looped := true else askaround g init newi bet
-    | _ -> failwith "error"
-    done
-
 
 let tupleconv l =
   match l with
@@ -84,31 +66,76 @@ let dealcards (g: gamestate) (i: int): gamestate =
   {dealer=g.dealer; pot=g.pot; scores=g.scores; deck=g.deck; table=newtable;
    hands=g.hands; players=g.players; bets=g.bets}
 
-let helper action g input =
+let fold (g: gamestate) (i: int): unit =
+  (if List.mem i g.players then
+    (print_string ("Player " ^ (string_of_int i) ^ " folds");
+    print_newline ();
+    let newplayers = List.filter ((<>) i) g.players in
+    g.players <- newplayers;
+    if (List.length g.players = 1)
+      then (let p = List.nth g.players 1 in
+           match p with
+           | 1 -> (print_string "Congratulations, you win the hand.";
+                  print_newline ();
+                  let score1 = !(List.nth g.scores 0) in
+                  let newscore = score1 + g.pot in
+                  g.pot <- 0;
+                  (List.nth g.scores 0) := newscore;
+                  g.table <- []);
+           | _ -> (print_string ("Player " ^ (string_of_int p) ^ " has won the hand");
+                  print_newline ();
+                  let score1 = !(List.nth g.scores (p-1)) in
+                  let newscore = score1 + g.pot in
+                  g.pot <- 0;
+                  (List.nth g.scores (p-1)) := newscore;
+                  g.table <- []);
+      engine g)
+      else ())
+  else failwith ("Player " ^ string_of_int i ^ " cannot fold"))
+
+and askaround (g: gamestate) (init: int) (i: int) (bet: int): unit =
+  (let looped = ref false in
+  while !looped = false do
+    let hand = List.nth g.hands i in
+    match (Ai.decision (createlist hand []) bet) with
+    | Fold -> fold g i;
+              let newi = nextplayer g i in
+              if newi = init then looped := true
+              else askaround g init newi bet
+    | Call -> let newbet = (bet - !(List.nth g.bets i)) in
+              betfunction g newbet i;
+              let newi = nextplayer g i in
+              if newi = init then looped := true else askaround g init newi bet
+    | _ -> failwith "error"
+    done)
+
+and checkorraise (g: gamestate): gamestate =
+  (let input = get_user_input "Check or Raise?" in
+  let action = get_action input in
   match action with
   | "check" -> dealcards g 3
   | "raise" -> let word_list = Str.split (Str.regexp " ") input in
-               let newbetstring = List.nth word_list 1 in
-               let newbet = int_of_string newbetstring in
+               let newbet = int_of_string (List.nth word_list 1) in
                betfunction g newbet 0;
-               askaround g 1 1 newbet;
-              dealcards g 3
-  | _ -> failwith "error"
+               askaround g 0 1 newbet;
+               dealcards g 3
+  | _ -> print_string "Invalid input. Please try again"; print_newline ();
+         checkorraise g)
 
-let rec engine (g: gamestate): unit =
-  match (List.length g.table) with
+and engine (g: gamestate): unit =
+  (match (List.length g.table) with
   | 0 -> printgame g;
          dealhands g g.players;
          if g.dealer = 0 then
-            (betfunction g 20 0; printcardlist g.hands;
-            askaround g 1 1 20; print_string "I am here 2";
-            let input = get_user_input "Check or Raise?" in
-            let action = get_action input in
-            engine (helper action g input))
+            (betfunction g 20 0;
+            askaround g 0 1 20;
+            let newg = checkorraise g in
+            engine newg)
          else
             betfunction g 20 g.dealer;
             askaround g (nextplayer g g.dealer) (nextplayer g g.dealer) 20;
-            let newg = dealcards g 3 in engine newg
+            let newg = dealcards g 3 in
+            engine newg
 
   (*If no cards on table, get bets and stuff, turn over 3 cards*)
   | 3 -> printgame g;
@@ -117,7 +144,7 @@ let rec engine (g: gamestate): unit =
   (*If 4 cards on table, final bets, turn over 5th*)
   | 5 -> printgame g;
   (*If 5 cards on table, determine who wins, distribute funds*)
-  | _ -> failwith "Something went wrong"
+  | _ -> failwith "Something went wrong")
 
 
 let _ =
