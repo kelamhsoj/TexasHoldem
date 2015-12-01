@@ -66,14 +66,15 @@ let dealcards (g: gamestate) (i: int): gamestate =
   {dealer=g.dealer; pot=g.pot; scores=g.scores; deck=g.deck; table=newtable;
    hands=g.hands; players=g.players; bets=g.bets}
 
-let fold (g: gamestate) (i: int): unit =
+let rec fold (g: gamestate) (i: int): unit =
   (if List.mem i g.players then
     (print_string ("Player " ^ (string_of_int i) ^ " folds");
     print_newline ();
     let newplayers = List.filter ((<>) i) g.players in
     g.players <- newplayers;
+    printintlist g.players;
     if (List.length g.players = 1)
-      then (let p = List.nth g.players 1 in
+      then (let p = List.nth g.players 0 in
            match p with
            | 1 -> (print_string "Congratulations, you win the hand.";
                   print_newline ();
