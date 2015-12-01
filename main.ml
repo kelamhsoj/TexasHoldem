@@ -1,3 +1,4 @@
+open Str
 open Deck
 open Ai
 
@@ -115,5 +116,5 @@ let rec engine (g: gamestate): unit =
 
 
 let _ =
-  let newgamestate = {dealer=1; pot=0; scores=[ref 100; ref 100]; deck=Deck.newdeck (); table=[]; hands=[]; players=[0;1];bets=[]} in
+  let newgamestate = {dealer=1; pot=0; scores=[ref 100; ref 100]; deck=(Deck.newdeck ()); table=[]; hands=[]; players=[0;1];bets=[]} in
   engine newgamestate
