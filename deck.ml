@@ -28,3 +28,5 @@ type deck = card list
 let shuffle d = failwith "TODO"
 
 let pop d i = failwith "TODO"
+
+let newdeck () = failwith "TODO"
