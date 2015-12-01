@@ -1,3 +1,5 @@
+open Random
+
 type suits =
   | Heart
   | Spade
@@ -23,12 +25,33 @@ type card = {suit: suits; value: values}
 
 type deck = card list ref
 
+let suit_to_string = function
+  | Heart -> "Hearts"
+  | Spade -> "Spades"
+  | Club -> "Clubs"
+  | Diamond -> "Diamonds"
+
 let to_suit = function
   | 1 -> Heart
   | 2 -> Spade
   | 3 -> Club
   | 4 -> Diamond
   | _ -> failwith "error"
+
+let value_to_string = function
+  | Ace -> "Ace"
+  | King -> "King"
+  | Queen -> "Queen"
+  | Jack -> "Jack"
+  | Ten -> "10"
+  | Nine -> "9"
+  | Eight -> "8"
+  | Seven -> "7"
+  | Six -> "6"
+  | Five -> "5"
+  | Four -> "4"
+  | Three -> "3"
+  | Two -> "2"
 
 let to_value = function
   | 1 -> Ace
@@ -78,3 +101,7 @@ let newdeck () =
     done
   done;
   result
+
+
+let printcard p =
+  print_string ((value_to_string p.value) ^ " of " ^ (suit_to_string p.suit))

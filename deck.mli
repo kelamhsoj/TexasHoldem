@@ -35,3 +35,6 @@ val pop: deck -> int -> card list
 
 (*Returns a new shuffled deck*)
 val newdeck: unit -> deck
+
+(*Prints out the card*)
+val printcard: card -> unit

@@ -4,9 +4,14 @@ open Ai
 
 type gamestate = {dealer: int; mutable pot: int;
       mutable scores:int ref list; deck: deck;
-      table: card list; hands: (card*card) ref list;
+      table: card list; mutable hands: (card*card) list;
       mutable players: int list; bets: int ref list}
 (*Players are numbered 0 through n-1 where n is the total number of players*)
+
+let rec printcardlist = function
+  | [] -> ()
+  | h::t -> printcard (fst h); print_string ", "; printcard (snd h);
+            print_newline (); printcardlist t
 
 let printgame (g: gamestate): unit =
   match (List.length g.table) with
@@ -38,7 +43,7 @@ let nextplayer (g: gamestate) (i:int): int =
 
 let fold (g: gamestate) (i: int): unit =
   if List.mem i g.players then
-    let newplayers = List.filter (fun a -> a != i) g.players in
+    let newplayers = List.filter ((<>) i) g.players in
     g.players <- newplayers
   else failwith ("Player " ^ string_of_int i ^ " cannot fold")
 
@@ -49,11 +54,12 @@ let createlist h tab =
 let rec askaround (g: gamestate) (init: int) (i: int) (bet: int): unit =
   let looped = ref false in
   while !looped = false do
-    let hand = !(List.nth g.hands i) in
+    let hand = List.nth g.hands i in
     match (Ai.decision (createlist hand []) bet) with
     | Fold -> fold g i;
               let newi = nextplayer g i in
-              if newi = init then looped := true else askaround g init newi bet
+              if newi = init then looped := true
+              else askaround g init newi bet
     | Call -> let newbet = (bet - !(List.nth g.bets i)) in
               betfunction g newbet i;
               let newi = nextplayer g i in
@@ -68,11 +74,10 @@ let tupleconv l =
   | _ -> failwith "error"
 
 let rec dealhands (g: gamestate) (p: int list): unit =
-  match p with
-  | [] -> ()
-  | h::t -> let ind = (List.length g.players) - (List.length p) in
-            (List.nth g.hands ind) := tupleconv (Deck.pop g.deck 2);
-            dealhands g t
+  match (List.length p) with
+  | 0 -> ()
+  | _ -> g.hands <- (tupleconv (Deck.pop g.deck 2))::g.hands;
+         dealhands g (List.tl p)
 
 let dealcards (g: gamestate) (i: int): gamestate =
   let newtable = (Deck.pop g.deck i) in
@@ -95,8 +100,8 @@ let rec engine (g: gamestate): unit =
   | 0 -> printgame g;
          dealhands g g.players;
          if g.dealer = 0 then
-            (betfunction g 20 0;
-            askaround g 1 1 20;
+            (betfunction g 20 0; printcardlist g.hands;
+            askaround g 1 1 20; print_string "I am here 2";
             let input = get_user_input "Check or Raise?" in
             let action = get_action input in
             engine (helper action g input))
@@ -116,5 +121,7 @@ let rec engine (g: gamestate): unit =
 
 
 let _ =
-  let newgamestate = {dealer=1; pot=0; scores=[ref 100; ref 100]; deck=(Deck.newdeck ()); table=[]; hands=[]; players=[0;1];bets=[]} in
+  let newgamestate = {dealer=0; pot=0; scores=[ref 100; ref 100];
+                      deck=(Deck.newdeck ()); table=[]; hands=[];
+                      players=[0;1];bets=[ref 0; ref 0]} in
   engine newgamestate
