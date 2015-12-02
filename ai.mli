@@ -16,3 +16,5 @@ val everyone_same_bet: int -> player list -> bool
 
 (*Takes a hand and a score and returns an action *)
 val decision: hand -> int -> action
+
+val current_best_hand: player -> unit
