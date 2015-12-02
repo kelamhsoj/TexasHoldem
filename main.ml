@@ -12,7 +12,7 @@ let rec dealhands (d:deck) (p: player list): unit =
             dealhands d t
 
 let dealcards (g: gamestate) (i: int): unit =
-  g.table <- (Deck.pop g.deck i)
+  g.table <- g.table @ (Deck.pop g.deck i)
 
 let printgame (g: gamestate): unit =
   match (List.length g.table) with
@@ -44,3 +44,15 @@ let rec engine (g: gamestate): unit =
          (*Determine winner*)
          (*Distribute score to *)
   | _ -> failwith "Muhfucka"
+
+
+let _ =
+  let human = create () in
+  let ai1 = create () in
+  let ai2 = create () in
+  let ai3 = create () in
+  let ai4 = create () in
+  let playingdeck = newdeck () in
+  let newgamestate = {pot = 0; deck = playingdeck; table=[];
+  players= [human; ai1; ai2; ai3; ai4]; bet = 0} in
+  engine newgamestate
