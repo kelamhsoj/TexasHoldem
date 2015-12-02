@@ -29,6 +29,7 @@ let printgame (g: gamestate): unit =
 
 let get_user_input (prompt: string): string =
   print_string prompt;
+  print_newline ();
   read_line()
 
 let get_action (input: string): string =
@@ -41,7 +42,15 @@ let get_action (input: string): string =
 let betfunction (g: gamestate) (bet: int) (player: int) =
   g.pot <- g.pot + bet;
   let currentbet = !(List.nth g.bets player) in
-  (List.nth g.bets player) := currentbet + bet
+  (List.nth g.bets player) := currentbet + bet;
+  match player with
+  | 0 -> print_string ("You add " ^ (string_of_int bet) ^ " chips to your bet");
+         print_newline ();
+         ()
+  | _ -> print_string ("Player " ^ (string_of_int (player+1)) ^ " adds " ^
+                                    (string_of_int bet) ^ " chips to his bet");
+         print_newline ();
+         ()
 
 let nextplayer (g: gamestate) (i:int): int =
   if (i+1) >= (List.length g.players) then 0 else (i + 1)
@@ -74,7 +83,7 @@ let rec fold (g: gamestate) (i: int): unit =
     g.players <- newplayers;
     printintlist g.players;
     if (List.length g.players = 1)
-      then (let p = List.nth g.players 0 in
+      then (let p = List.hd g.players in
            match p with
            | 1 -> (print_string "Congratulations, you win the hand.";
                   print_newline ();
@@ -103,19 +112,29 @@ and askaround (g: gamestate) (init: int) (i: int) (bet: int): unit =
               let newi = nextplayer g i in
               if newi = init then looped := true
               else askaround g init newi bet
-    | Call -> let newbet = (bet - !(List.nth g.bets i)) in
+    | Call -> print_string ("Player " ^ (string_of_int i) ^ " calls");
+              print_newline ();
+              let newbet = (bet - !(List.nth g.bets i)) in
               betfunction g newbet i;
               let newi = nextplayer g i in
               if newi = init then looped := true else askaround g init newi bet
     | _ -> failwith "error"
     done)
 
+(*and raised (g: gamestate) (i: int) (bet: int) (p: int list): unit =
+  match p with
+  | [] -> ()
+  | h::t -> if i = 1 then
+              callorraiseorfold
+            else*)
+
 and checkorraise (g: gamestate): gamestate =
   (let input = get_user_input "Check or Raise?" in
   let action = get_action input in
   match action with
-  | "check" -> dealcards g 3
-  | "raise" -> let word_list = Str.split (Str.regexp " ") input in
+  | "check" -> print_string "checking"; dealcards g 3
+  | "raise" -> print_string "raising";
+               let word_list = Str.split (Str.regexp " ") input in
                let newbet = int_of_string (List.nth word_list 1) in
                betfunction g newbet 0;
                askaround g 0 1 newbet;
@@ -151,5 +170,5 @@ and engine (g: gamestate): unit =
 let _ =
   let newgamestate = {dealer=0; pot=0; scores=[ref 100; ref 100];
                       deck=(Deck.newdeck ()); table=[]; hands=[];
-                      players=[0;1];bets=[ref 0; ref 0]} in
+                      players=[1;2];bets=[ref 0; ref 0]} in
   engine newgamestate
