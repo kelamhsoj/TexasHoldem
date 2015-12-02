@@ -1,5 +1,6 @@
 open Ai
 open Deck
+open Str
 
 (*Notes:
   * Game is initialized with a newgamestate
@@ -38,36 +39,37 @@ let init_game () =  let human = create_human () in
 
 (*Prints promp and returns the action option of what the human wants to do*)
 let cycle_user_input (prompt: string): action option =
-  failwith "broken"
-  (*print_string prompt;
+  print_string prompt;
   print_newline ();
   let result = read_line() in
   let result' = String.lowercase result in
   let word_list = Str.split (Str.regexp " ") result' in
   match word_list with
-  | [x] -> match x with
+  | x::[] -> (match x with
            | "fold" -> Some Fold
            | "check" -> Some Call
            | "call" -> Some Call
-           | _ -> None
-  | x::[y] -> match x with
-              | "raise" -> try let num = int_of_string y in
-                               Some (Raise num)
-                           with None
-              | _ -> None
-  | _ -> None*)
+           | _ -> None)
+  | x::y::tl -> (match x with
+              | "raise" -> (try (let num = int_of_string y in
+                               Some (Raise num))
+                           with _ -> None)
+              | _ -> None)
+  | _ -> None
+
 
 (*Welcomes User, ask if they would like to play*)
-let welcome_user gstate =
-  print_endline "Welcome to Texas Holdem!"
-
+let rec welcome_user gstate =
+  print_endline "Welcome to Texas Holdem!";
+  gstate.mode <- Init;
+  engine gstate
 
 (* *Deal players two cards
    *Print to human what cards they have
   * Deduct buy-in score and add to pot
   * change gamestate mode to Preflop
  *)
-let deal (gstate: gamestate) =
+and deal (gstate: gamestate) =
   print_endline "Dealing Cards";
   match (gstate.players) with
     | [] -> ()
@@ -79,7 +81,7 @@ let deal (gstate: gamestate) =
   Update gamestate
   If player is an ai, get decision, match on decision, update gamestate
  *)
-let rec cycle gstate =
+and cycle gstate =
   failwith "TODO"
 
 (* Hands are shown, pot is emptied, score of winner is updated
@@ -88,11 +90,11 @@ let rec cycle gstate =
   If they do have more money they are asked if they want to play a new round
   and stage goes back to init
 *)
-let finish_round gstate =
+and finish_round gstate =
   failwith "TODO"
 
 (*Main function that runs based on state of the game*)
-let engine gstate =
+and engine gstate =
   match gstate.mode with
     | Welcome -> welcome_user gstate
     | Init -> deal gstate
