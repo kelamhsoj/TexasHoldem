@@ -24,14 +24,14 @@ let rec everyone_same_bet (currentbet: int) (playerlist : player list) : bool =
                                        everyone_same_bet currentbet t
             else everyone_same_bet currentbet t
 
-let percentagebet (best_combo : hand) : float =
+(*let percentagebet (best_combo : hand) : float =
   match best_combo with
   | Straightflush _ -> 1.0
   | Fourofkind _ -> 0.95
   | Fullhouse _ -> 0.85
   | Flush _ -> 0.7
   | Straight _-> 0.65
-  | _ -> Random.float 0.5
+  | _ -> Random.float 0.5*)
 
 let decisionpreflop (player : player) (currentbet: int) : action =
   let randomval = Random.float 1. in
@@ -265,56 +265,57 @@ let decisionriver (player : player) (currentbet : int) : action =
   | Some (Flush _) -> if currentbet > player.money then allinhelper player currentbet
                               else (if randomval < 0.2 then
                                             let difference = currentbet - player.currentbet in
-                                            player.money <- player.money - difference;
+                                            player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = 0.3 *. (float_of_int player.money) in
-                                            player.money <- player.money - raiseval;
-                                            player.currentbet <- currentbet+raiseval;
-                                            Raise (int_of_float raiseval))
+                                            else let raiseval = int_of_float (0.3 *. (float_of_int player.money)) in
+                                            player.money <- (player.money - raiseval);
+                                            player.currentbet <- (currentbet+raiseval);
+                                            Raise raiseval)
   | Some (Straight _)-> if currentbet > player.money then allinhelper player currentbet
                               else (if randomval < 0.3 then
                                             let difference = currentbet - player.currentbet in
-                                            player.money <- player.money - difference;
+                                            player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = 0.2 *. (float_of_int player.money) in
-                                            player.money <- player.money - raiseval;
-                                            player.currentbet <- currentbet+raiseval;
-                                            Raise (int_of_float raiseval))
+                                            else let raiseval = int_of_float (0.2 *. (float_of_int player.money)) in
+                                            player.money <- (player.money - raiseval);
+                                            player.currentbet <- (currentbet+raiseval);
+                                            Raise raiseval)
   | Some (Threeofkind _)-> if currentbet > player.money then allinhelper player currentbet
                               else (if randomval < 0.4 then
                                             let difference = currentbet - player.currentbet in
-                                            player.money <- player.money - difference;
+                                            player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = 0.1 *. (float_of_int player.money) in
-                                            player.money <- player.money - raiseval;
-                                            player.currentbet <- currentbet+raiseval;
-                                            Raise (int_of_float raiseval))
+                                            else let raiseval = int_of_float (0.1 *. (float_of_int player.money)) in
+                                            player.money <- (player.money - raiseval);
+                                            player.currentbet <- (currentbet+raiseval);
+                                            Raise raiseval)
   | Some (Twopair _)-> if currentbet > player.money then allinhelper player currentbet
                               else (if randomval < 0.75 then
                                             let difference = currentbet - player.currentbet in
-                                            player.money <- player.money - difference;
+                                            player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = 0.05 *. (float_of_int player.money) in
-                                            player.money <- player.money - raiseval;
-                                            player.currentbet <- currentbet+raiseval;
-                                            Raise (int_of_float raiseval))
+                                            else let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
+                                            player.money <- (player.money - raiseval);
+                                            player.currentbet <- (currentbet+raiseval);
+                                            Raise raiseval)
   | Some (Onepair _)-> if currentbet > player.money then foldhelper player
                               else (if randomval < 0.9 then
                                             let difference = currentbet - player.currentbet in
-                                            player.money <- player.money - difference;
+                                            player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = 0.05 *. (float_of_int player.money) in
-                                            player.money <- player.money - raiseval;
-                                            player.currentbet <- currentbet+raiseval;
-                                            Raise (int_of_float raiseval))
+                                            else let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
+                                            player.money <- (player.money - raiseval);
+                                            player.currentbet <- (currentbet+raiseval);
+                                            Raise raiseval)
   | Some (Highcard _)-> if currentbet > player.money then foldhelper player
-                              else (if float_of_int (player.money) *. 0.5 < currentbet then foldhelper player
+                              else (if int_of_float (float_of_int (player.money) *. 0.5) < currentbet then foldhelper player
                                     else Call)
+  | _ -> failwith "error"
 
 let current_best_hand (player:player) : unit =
-  player.best_hand <- Some (best_hand cards)
+  player.best_hand <- Some (best_hand player.cards)

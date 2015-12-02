@@ -4,7 +4,7 @@ open Cardcomp
 type status = Playing | Allin| Folded
 type player = { mutable state : status ; mutable money : int;
                 mutable cards : card list ; mutable currentbet : int;
-                mutable best_hand: hand option}
+                mutable best_hand: hand option ; human : bool}
 (*Holds specs of decision made by AI *)
 type action = Fold | Call | Raise of int
 
@@ -17,6 +17,15 @@ val maxbet: player list -> int
 val everyone_same_bet: int -> player list -> bool
 
 (*Takes a hand and a score and returns an action *)
-val decision: hand -> int -> action
+val decisionpreflop: player -> int -> action
+
+(*Takes a hand and a score and returns an action *)
+val decisionflop: player -> int -> action
+
+(*Takes a hand and a score and returns an action *)
+val decisionturn: player -> int -> action
+
+(*Takes a hand and a score and returns an action *)
+val decisionriver: player -> int -> action
 
 val current_best_hand: player -> unit
