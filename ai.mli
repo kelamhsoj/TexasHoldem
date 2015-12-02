@@ -8,9 +8,9 @@ type player = { mutable state : status ; mutable money : int;
 (*Holds specs of decision made by AI *)
 type action = Fold | Call | Raise of int
 
-val createhuman: unit -> player
+val create_human: unit -> player
 
-val createai: unit -> player
+val create_ai: unit -> player
 
 val maxbet: player list -> int
 

@@ -9,9 +9,9 @@ type player = { mutable state : status ; mutable money : int;
 
 type action = Fold | Call | Raise of int
 
-let createhuman () = {state = Playing ; money = 200; cards = []; currentbet = 0;
+let create_human () = {state = Playing ; money = 200; cards = []; currentbet = 0;
                  best_hand = None; human=true}
-let createai () = {state = Playing ; money = 200; cards = []; currentbet = 0;
+let create_ai () = {state = Playing ; money = 200; cards = []; currentbet = 0;
                  best_hand = None; human=false}
 
 let maxbet (playerlist : player list) : int =
