@@ -57,6 +57,25 @@ let cycle_user_input (prompt: string): action option =
               | _ -> None)
   | _ -> None
 
+(*Reads the gamestate, asks the player the appropritate question, and returns an action option*)
+let getuserdecision gstate player =
+  if (gstate.bet > player.currentbet) then cycle_user_input "Would you like to fold, call, or raise the bet further?"
+  else if (gstate.bet = player.currentbet) then cycle_user_input "Would you like to check or raise?"
+  else failwith "error"
+
+(*Prints out a list of cards*)
+let rec printcardlist = function
+  | [] -> ()
+  | h::t -> printcard h; print_string ", ";
+            printcardlist t
+
+(*Method for testing that prints out the cards in each player's hand*)
+let printhands gstate =
+  for x = 0 to ((List.length gstate.players)-1) do
+    print_string ("Player " ^ (string_of_int x) ^ ":");
+    printcardlist (List.nth gstate.players x).cards;
+    print_newline ()
+  done
 
 (*Welcomes User, ask if they would like to play*)
 let rec welcome_user gstate =
@@ -71,9 +90,12 @@ let rec welcome_user gstate =
  *)
 and deal (gstate: gamestate) =
   print_endline "Dealing Cards";
-  match (gstate.players) with
-    | [] -> ()
-    | h::t -> failwith "TODO"
+  for x = 0 to ((List.length gstate.players)-1) do
+    let p = (List.nth gstate.players x) in
+    p.cards <- (Deck.pop gstate.deck 2)
+  done;
+  gstate.mode <- Preflop;
+  engine gstate
 
 (*Go through player list
   If player is a human, prompt user input (call, fold, or raise)
@@ -82,7 +104,51 @@ and deal (gstate: gamestate) =
   If player is an ai, get decision, match on decision, update gamestate
  *)
 and cycle gstate =
-  failwith "TODO"
+  for x = 0 to ((List.length gstate.players)-1) do
+    let p = (List.nth gstate.players x) in
+    match p.state with
+    | Folded | Allin -> ()
+    | Playing -> if p.human = true then
+                  (match getuserdecision gstate p with
+                  | None ->  print_endline "Command not recognized. Please try again";
+                             cycle gstate
+                  | Some Fold -> print_endline "You fold";
+                                 p.state <- Folded
+                  | Some Call -> let rest = (gstate.bet - p.currentbet) in
+                                 if rest > p.money then
+                                   (p.currentbet <- (p.currentbet + p.money);
+                                   gstate.pot <- gstate.pot + p.money;
+                                   p.money <- 0;
+                                   p.state <- Allin)
+                                 else
+                                   (p.currentbet <- (p.currentbet + rest);
+                                   gstate.pot <- gstate.pot + rest;
+                                   p.money <- p.money - rest)
+                  | Some Raise y -> if y <=0 then
+                                      (print_endline "Invalid amount. Please try again";
+                                      cycle gstate)
+                                    else if y >= p.money then
+                                      (p.currentbet <- p.currentbet + p.money;
+                                      gstate.pot <- gstate.pot + p.money;
+                                      p.money <- 0)
+                                    else
+                                      (let rest = (gstate.bet - p.currentbet) in
+                                      p.currentbet <- (gstate.bet + y);
+                                      gstate.pot <- gstate.pot + rest + y;
+                                      p.money <- ((p.money - rest) - y)))
+                else let bet = p.currentbet in
+                     (match Ai.decisionpreflop p gstate.bet with
+                     | Fold -> print_endline ("Player " ^ (string_of_int x) ^ " folds")
+                     | Call -> print_endline ("Player " ^ (string_of_int x) ^ " calls");
+                               gstate.pot <- gstate.pot + (gstate.bet - bet)
+                     | Raise y -> gstate.bet <- gstate.bet + y;
+                                  gstate.pot <- gstate.pot + (gstate.bet - bet))
+  done;
+  if gstate.mode = Preflop then gstate.mode <- Flop
+  else if gstate.mode = Flop then gstate.mode <- Turn
+  else if gstate.mode = Turn then gstate.mode <- River
+  else if gstate.mode = River then gstate.mode <- End
+  else failwith "error"
 
 (* Hands are shown, pot is emptied, score of winner is updated
   If any players are eliminated, they are removed from the table
@@ -92,6 +158,9 @@ and cycle gstate =
 *)
 and finish_round gstate =
   failwith "TODO"
+  (*printhands gstate;
+  gstate.mode <- Init;
+  engine gstate*)
 
 (*Main function that runs based on state of the game*)
 and engine gstate =
