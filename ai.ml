@@ -45,7 +45,9 @@ let decisionpreflop (player : player) (currentbet: int) : action =
                                             (player.money <- (player.money - difference));
                                             (player.currentbet <- currentbet);
                                             Call)
-                                            else (let raiseval = int_of_float (0.1 *. (float_of_int player.money)) in
+                                            else (let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference)); (*has to match if the money is behind*)
+                                            let raiseval = int_of_float (0.1 *. (float_of_int player.money)) in
                                             (player.money <- (player.money - raiseval));
                                             (player.currentbet <- (currentbet+raiseval));
                                             Raise raiseval))
@@ -55,7 +57,9 @@ let decisionpreflop (player : player) (currentbet: int) : action =
                             (player.currentbet <- currentbet);
                             Call)
                             else
-                            (let raiseval = int_of_float (0.1 *. (float_of_int player.money)) in
+                            (let difference = currentbet - player.currentbet in
+                            (player.money <- (player.money - difference));
+                            let raiseval = int_of_float (0.1 *. (float_of_int player.money)) in
                             (player.money <- (player.money - raiseval));
                             (player.currentbet <- (currentbet+raiseval));
                             Raise raiseval)))
@@ -81,7 +85,9 @@ let decisionflop (player: player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.2 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.2 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -91,7 +97,9 @@ let decisionflop (player: player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.15 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.15 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -101,7 +109,9 @@ let decisionflop (player: player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.1 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.1 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -111,7 +121,9 @@ let decisionflop (player: player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.1 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.1 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -121,7 +133,9 @@ let decisionflop (player: player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.1 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.1 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -131,7 +145,9 @@ let decisionflop (player: player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -141,7 +157,9 @@ let decisionflop (player: player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -151,7 +169,9 @@ let decisionflop (player: player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -161,7 +181,9 @@ let decisionflop (player: player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.03 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.03 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -176,7 +198,9 @@ let decisionturn (player: player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.4 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.4 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -186,7 +210,9 @@ let decisionturn (player: player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.3 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.3 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -196,7 +222,9 @@ let decisionturn (player: player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.2 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.2 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -206,7 +234,9 @@ let decisionturn (player: player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.15 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.15 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -216,7 +246,9 @@ let decisionturn (player: player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.1 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.1 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -226,7 +258,9 @@ let decisionturn (player: player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -236,7 +270,9 @@ let decisionturn (player: player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -246,7 +282,9 @@ let decisionturn (player: player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -268,7 +306,9 @@ let decisionriver (player : player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.3 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.3 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -278,7 +318,9 @@ let decisionriver (player : player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.2 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.2 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -288,7 +330,9 @@ let decisionriver (player : player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.1 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.1 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -298,7 +342,9 @@ let decisionriver (player : player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
@@ -308,7 +354,9 @@ let decisionriver (player : player) (currentbet : int) : action =
                                             player.money <- (player.money - difference);
                                             player.currentbet <- currentbet;
                                             Call
-                                            else let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
+                                            else let difference = currentbet - player.currentbet in
+                                            (player.money <- (player.money - difference));
+                                            let raiseval = int_of_float (0.05 *. (float_of_int player.money)) in
                                             player.money <- (player.money - raiseval);
                                             player.currentbet <- (currentbet+raiseval);
                                             Raise raiseval)
