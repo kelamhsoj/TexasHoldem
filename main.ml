@@ -41,9 +41,17 @@ let add_cardto_table gstate =
   let old = gstate.table in
   match gstate.mode with
   | Flop -> let newc = pop gstate.deck 3 in
-            gstate.table <- newc
+            gstate.table <- newc;
+            for x = 0 to ((List.length gstate.players)-1) do
+              let p = List.nth gstate.players x in
+              p.cards <- p.cards @ newc
+            done
   | Turn | River -> let newc = pop gstate.deck 1 in
-                    gstate.table <- old @ newc
+                    gstate.table <- old @ newc;
+                    for x = 0 to ((List.length gstate.players)-1) do
+                      let p = List.nth gstate.players x in
+                      p.cards <- p.cards @ newc
+                    done
   | _ -> failwith "error"
 
 
@@ -218,16 +226,16 @@ in begin (cycleinside gstate gstate.players); run_cycle gstate end
 *)
 and finish_round gstate =
   for x = 0 to (List.length gstate.players -1) do
-  let p = List.nth gstate.players x in
-  (current_best_hand p)
+    let p = List.nth gstate.players x in
+    printcardlist p.cards;
+    current_best_hand p
   done; (*make sure everyone has the most updated hands*)
-
   let best_hands = winners (gstate.players) in
   let split_pot = (gstate.pot) / (List.length best_hands) in
-
   for x = 0 to (List.length best_hands -1) do
-  let p = List.nth best_hands x in
-  (p.money <- money + split_pot) done
+    let p = List.nth best_hands x in
+    (p.money <- p.money + split_pot)
+  done;
 
   let rec remove_nomoney acc lst =
   match lst with
@@ -239,7 +247,8 @@ and finish_round gstate =
 
   let player_not_bust = List.fold_left (fun acc x -> acc || x.human) false updated_playerlist in
 
-  if player_not_bust then begin print_endline "Would you like to play another round?";
+  if player_not_bust then begin
+    print_endline "Would you like to play another round?";
     let rec input_helper () =
       let result = read_line() in
       let result' = String.lowercase result in
@@ -247,10 +256,10 @@ and finish_round gstate =
         | "yes" -> print_endline "Ok, starting new round!";
                 gstate.pot <- 0;
                 gstate.players <- updated_playerlist;
-                gstate.deck = newdeck();
+                gstate.deck <- newdeck();
                 gstate.bet <- 100;
                 gstate.mode <- Init;
-                gstate.table < - []
+                gstate.table <- []
         | "no" -> print_endline "Ok, quitting"
                (*quit*)
         | _ -> print_endline "It was a yes or no question.";
@@ -269,7 +278,9 @@ and finish_round gstate =
                 engine newstate
         | "no" -> print_endline "Ok, quitting"
         | _ -> print_endline "It was a yes or no question.";
-               input_helper ()) in input_helper () )
+               input_helper ()) in
+    input_helper () )
+
 (*Main function that runs based on state of the game*)
 and engine gstate =
 (*add print statements when cards are added*)
