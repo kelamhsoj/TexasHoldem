@@ -8,6 +8,12 @@ type player = { mutable state : status ; mutable money : int;
                 mutable best_hand : hand option; human : bool; name: string;
                 pronoun: string}
 
+let printplayer x =
+  print_string x.name
+
+let printplayerscore x =
+  print_string (x.name ^ " - " ^ (string_of_int x.money))
+
 type action = Fold | Call | Raise of int
 
 let create_human () = {state = Playing ; money = 200; cards = []; currentbet = 0;

@@ -32,3 +32,7 @@ val decisionriver: player -> int -> action
 val current_best_hand: player -> unit
 
 val winners: player list -> player list
+
+val printplayer: player -> unit
+
+val printplayerscore: player -> unit

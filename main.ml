@@ -86,6 +86,15 @@ let rec printcardlist = function
   | h::t -> printcard h; print_string ", ";
             printcardlist t
 
+(*Prints out a list of players*)
+let rec printplayerlist = function
+  | [] -> ()
+  | h::t -> printplayer h; print_string ", "; printplayerlist t
+
+let rec printplayerscorelist = function
+  | [] -> ()
+  | h::t -> printplayerscore h; print_newline (); printplayerscorelist t
+
 (*Method for testing that prints out the cards in each player's hand*)
 let printhands gstate =
   for x = 0 to ((List.length gstate.players)-1) do
@@ -104,7 +113,7 @@ let rec welcome_user gstate =
     match result' with
       | "yes" -> print_endline "Ok, starting game! You are Player 1";
                 gstate.mode <- Init
-      | "no" -> print_endline "Ok, quitting"
+      | "no" -> print_endline "Come back soon!"
                (*quit*)
       | _ -> print_endline "It was a yes or no question.";
              input_helper () in
@@ -174,24 +183,24 @@ and cycle_human_helper gstate p =
     | Some Raise y -> (if y <=0 then
                       (print_endline "Invalid amount. Please try again";
                                             cycle_human_helper gstate p)
-                      else if (gstate.bet + y >= p.money) then
-                      begin           p.currentbet <- p.currentbet + p.money;
-                                      gstate.pot <- gstate.pot + p.money;
-                                      p.state <- Allin;
-                                      gstate.bet <- p.money;
-                                      p.money <- 0
-                                                   end
+                      else if (gstate.bet + y >= p.money) then begin
+                              p.currentbet <- p.currentbet + p.money;
+                              gstate.pot <- gstate.pot + p.money;
+                              p.state <- Allin;
+                              gstate.bet <- p.money;
+                              p.money <- 0
+                              end
                       else (let rest = (gstate.bet - p.currentbet) in
-                                      p.currentbet <- (gstate.bet + y);
-                                      gstate.pot <- gstate.pot + rest + y;
-                                      gstate.bet <- gstate.bet + y;
-                                      p.money <- ((p.money - rest) - y)))
+                           p.currentbet <- (gstate.bet + y);
+                           gstate.pot <- gstate.pot + rest + y;
+                           gstate.bet <- gstate.bet + y;
+                           p.money <- ((p.money - rest) - y)))
 
 and cycleinside gstate players =
   match players with
   | [] -> ()
   | h :: t -> (match h.state with
-    | Folded -> print_endline (h.name ^ " " ^ h.pronoun ^ " still out because she folded"); cycleinside gstate t
+    | Folded -> print_endline (h.name ^ " " ^ h.pronoun ^ " still out because " ^ h.name ^ " folded"); cycleinside gstate t
     | Allin ->  print_endline (h.name ^ " " ^ h.pronoun ^ " still all in"); cycleinside gstate t
     | Playing -> if h.human = true then
                  begin cycle_human_helper gstate h; cycleinside gstate t end
@@ -255,10 +264,13 @@ and finish_round gstate =
     let p = List.nth gstate.players x in
     current_best_hand p
     done;
-
   (*make sure everyone has the most updated hands*)
+
   let best_hands = winners (gstate.players) in
   (*find the winners*)
+
+  print_newline ();
+  print_string "Winner(s): "; printplayerlist best_hands; print_newline ();
 
   let split_pot = (gstate.pot) / (List.length best_hands) in
   (*split it amongst the number of people*)
@@ -267,6 +279,11 @@ and finish_round gstate =
     let p = List.nth best_hands x in
     (p.money <- p.money + split_pot)
   done;
+
+  print_newline ();
+  print_string "Scores: ";
+  print_newline ();
+  printplayerscorelist gstate.players; print_newline ();
 
   let rec remove_nomoney acc lst =
   match lst with
@@ -289,7 +306,7 @@ and finish_round gstate =
                 let newstate = init_game () in
                 newstate.mode <- Init;
                 engine newstate
-        | "no" -> print_endline "Ok, quitting"
+        | "no" -> print_endline "Thanks for playing, see you soon!"
                (*quit*)
         | _ -> print_endline "It was a yes or no question.";
                input_helper () in
@@ -314,7 +331,7 @@ and finish_round gstate =
                 gstate.mode <- Init;
                 gstate.table <- [];
                 engine gstate
-        | "no" -> print_endline "Ok, quitting"
+        | "no" -> print_endline "Ok, thanks for playing!"
                (*quit*)
         | _ -> print_endline "It was a yes or no question.";
                input_helper () in
@@ -330,7 +347,7 @@ and finish_round gstate =
                 let newstate = init_game () in
                 newstate.mode <- Init;
                 engine newstate
-        | "no" -> print_endline "Ok, quitting"
+        | "no" -> print_endline "Thanks for playing, better luck next time!"
         | _ -> print_endline "It was a yes or no question.";
                input_helper ()) in
     input_helper () )
