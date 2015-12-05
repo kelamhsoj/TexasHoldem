@@ -128,7 +128,8 @@ and deal (gstate: gamestate) =
   engine gstate
 
 and run_cycle gstate =
-  if (everyone_same_bet gstate.bet gstate.players) then begin
+  gstate.bet <- (maxbet gstate.players);
+  if (everyone_same_bet (gstate.bet) gstate.players) then begin
     match gstate.mode with
     | Preflop -> gstate.mode <- Flop; gstate.bet <- 0;
     for x = 0 to (List.length gstate.players -1) do
@@ -157,8 +158,7 @@ else cycle gstate
   If player is an ai, get decision, match on decision, update gamestate
  *)
 and cycle_human_helper gstate p =
-Printf.printf "%d\n" gstate.bet;
-  match (getuserdecision gstate p) with
+    match (getuserdecision gstate p) with
     | None -> print_endline "Command not recognized. Please try again";
               cycle_human_helper gstate p
     | Some Fold -> print_endline "You fold"; p.state <- Folded
@@ -212,24 +212,28 @@ and cycleinside gstate players =
                                     | Call -> print_endline ("Player calls");
                                               gstate.pot <- gstate.pot + (gstate.bet - bet);
                                               cycleinside gstate t
-                                    | Raise y -> (gstate.pot <- gstate.pot + (gstate.bet - bet) + y);
+                                    | Raise y -> print_endline ("Player raises " ^ string_of_int y ^ " dollars");
+                                                 (gstate.pot <- gstate.pot + (gstate.bet - bet) + y);
                                                   gstate.bet <- gstate.bet + y;
-                                              cycleinside gstate t)
-                      | Turn -> current_best_hand h; (*compute the best hand*)
+                                                 cycleinside gstate t)
+                      | Turn ->    current_best_hand h; (*compute the best hand*)
                                    (match Ai.decisionturn h gstate.bet with
                                     | Fold -> print_endline ("Player folds"); cycleinside gstate t
                                     | Call -> print_endline ("Player calls");
                                               gstate.pot <- gstate.pot + (gstate.bet - bet);
                                               cycleinside gstate t
-                                    | Raise y -> (gstate.pot <- gstate.pot + (gstate.bet - bet) + y);
-                                                  gstate.bet <- gstate.bet + y)
+                                    | Raise y -> print_endline ("Player raises " ^ string_of_int y ^ " dollars");
+                                                 (gstate.pot <- gstate.pot + (gstate.bet - bet) + y);
+                                                  gstate.bet <- gstate.bet + y;
+                                                  cycleinside gstate t)
                       | River -> current_best_hand h; (*computes the best hand*)
                                    (match Ai.decisionriver h gstate.bet with
                                     | Fold -> print_endline ("Player folds"); cycleinside gstate t
                                     | Call -> print_endline ("Player calls");
                                               gstate.pot <- gstate.pot + (gstate.bet - bet);
                                               cycleinside gstate t
-                                    | Raise y -> (gstate.pot <- gstate.pot + (gstate.bet - bet) + y);
+                                    | Raise y -> print_endline ("Player raises " ^ string_of_int y ^ " dollars");
+                                                 (gstate.pot <- gstate.pot + (gstate.bet - bet) + y);
                                                   gstate.bet <- gstate.bet + y;
                                                   cycleinside gstate t)
                       | _ -> failwith "Non-Playable State"))
@@ -254,9 +258,8 @@ and finish_round gstate =
 
   (*make sure everyone has the most updated hands*)
   let best_hands = winners (gstate.players) in
-  Printf.printf ("%d") (List.length best_hands)
   (*find the winners*)
-(*
+
   let split_pot = (gstate.pot) / (List.length best_hands) in
   (*split it amongst the number of people*)
 
@@ -274,16 +277,38 @@ and finish_round gstate =
   let updated_playerlist = remove_nomoney [] gstate.players in
 
   let player_not_bust = List.fold_left (fun acc x -> acc || x.human) false updated_playerlist in
-  Printf.printf "%b" player_not_bust;
   if player_not_bust then
-    (print_endline "Would you like to play another round?";
+    if List.length updated_playerlist = 1 then
+     (print_endline "You won!!!!";
+      print_endline "Would you like to play another game?";
     let rec input_helper () =
       let result = read_line() in
       let result' = String.lowercase result in
       match result' with
-        | "yes" -> print_endline "Ok, starting new round!";
+        | "yes" -> print_endline "Ok, starting new game!";
+                let newstate = init_game () in
+                newstate.mode <- Init;
+                engine newstate
+        | "no" -> print_endline "Ok, quitting"
+               (*quit*)
+        | _ -> print_endline "It was a yes or no question.";
+               input_helper () in
+  input_helper ())
+   else (print_endline "Would you like to play another round?";
+    let rec input_helper () =
+      let result = read_line() in
+      let result' = String.lowercase result in
+      match result' with
+        | "yes" -> print_endline "Ok, starting new game!";
                 gstate.pot <- 0;
                 gstate.players <- updated_playerlist;
+                for x = 0 to (List.length gstate.players -1) do
+                let p = List.nth gstate.players x in
+                p.state <- Playing;
+                p.cards <- [];
+                p.best_hand <- None;
+                p.currentbet <- 0
+                done;
                 gstate.deck <- newdeck();
                 gstate.bet <- 100;
                 gstate.mode <- Init;
@@ -293,8 +318,7 @@ and finish_round gstate =
                (*quit*)
         | _ -> print_endline "It was a yes or no question.";
                input_helper () in
-  input_helper ()
-  (*engine gstate*))
+  input_helper ())
   else
    (print_endline "You have lost all your money." ;
     print_endline "Would you like to play again?" ;
@@ -310,7 +334,7 @@ and finish_round gstate =
         | _ -> print_endline "It was a yes or no question.";
                input_helper ()) in
     input_helper () )
-*)
+
 (*Main function that runs based on state of the game*)
 and engine gstate =
 (*add print statements when cards are added*)
