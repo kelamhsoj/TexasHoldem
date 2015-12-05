@@ -5,14 +5,15 @@ open Cardcomp
 type status = Playing | Allin | Folded
 type player = { mutable state : status ; mutable money : int;
                 mutable cards : card list ; mutable currentbet : int;
-                mutable best_hand : hand option; human : bool}
+                mutable best_hand : hand option; human : bool; name: string;
+                pronoun: string}
 
 type action = Fold | Call | Raise of int
 
-let create_human () = {state = Playing ; money = 10000; cards = []; currentbet = 0;
-                 best_hand = None; human=true}
-let create_ai () = {state = Playing ; money = 10000; cards = []; currentbet = 0;
-                 best_hand = None; human=false}
+let create_human () = {state = Playing ; money = 200; cards = []; currentbet = 0;
+                 best_hand = None; human=true; name="You"; pronoun="are"}
+let create_ai name = {state = Playing ; money = 200; cards = []; currentbet = 0;
+                 best_hand = None; human=false; name=name; pronoun="is"}
 
 let maxbet (playerlist : player list) : int =
   List.fold_left (fun acc x -> if x.currentbet > acc then x.currentbet

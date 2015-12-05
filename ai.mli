@@ -4,13 +4,14 @@ open Cardcomp
 type status = Playing | Allin| Folded
 type player = { mutable state : status ; mutable money : int;
                 mutable cards : card list ; mutable currentbet : int;
-                mutable best_hand: hand option ; human : bool}
+                mutable best_hand: hand option ; human : bool; name: string;
+                pronoun: string}
 (*Holds specs of decision made by AI *)
 type action = Fold | Call | Raise of int
 
 val create_human: unit -> player
 
-val create_ai: unit -> player
+val create_ai: string -> player
 
 val maxbet: player list -> int
 

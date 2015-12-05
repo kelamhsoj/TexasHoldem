@@ -28,13 +28,13 @@ type gamestate = {mutable pot:int; mutable deck: deck; mutable table: card list;
 
 (*Create new gamestate*)
 let init_game () =  let human = create_human () in
-  let ai1 = create_ai () in
-  let ai2 = create_ai () in
-  let ai3 = create_ai () in
-  let ai4 = create_ai () in
+  let ai1 = create_ai "Sandy" in
+  let ai2 = create_ai "Fred" in
+  let ai3 = create_ai "Jeff" in
+  let ai4 = create_ai "Terry" in
   let playingdeck = newdeck () in
   let newgamestate = {pot = 0; deck = playingdeck; table=[];
-  players= [human; ai1; ai2; ai3; ai4]; bet = 100; mode = Welcome } in
+  players= [human; ai1; ai2; ai3; ai4]; bet = 5; mode = Welcome } in
   newgamestate
 
 let add_cardto_table gstate =
@@ -191,48 +191,48 @@ and cycleinside gstate players =
   match players with
   | [] -> ()
   | h :: t -> (match h.state with
-    | Folded -> print_endline ("Player is still out because she folded"); cycleinside gstate t
-    | Allin ->  print_endline ("Player is still all in"); cycleinside gstate t
+    | Folded -> print_endline (h.name ^ " " ^ h.pronoun ^ " still out because she folded"); cycleinside gstate t
+    | Allin ->  print_endline (h.name ^ " " ^ h.pronoun ^ " still all in"); cycleinside gstate t
     | Playing -> if h.human = true then
                  begin cycle_human_helper gstate h; cycleinside gstate t end
                  else let bet = h.currentbet in
                      (match gstate.mode with
                       | Preflop -> (match Ai.decisionpreflop h gstate.bet with
-                                    | Fold -> print_endline ("Player folds"); cycleinside gstate t
-                                    | Call -> print_endline ("Player calls");
+                                    | Fold -> print_endline (h.name ^ " folds"); cycleinside gstate t
+                                    | Call -> print_endline (h.name ^ " calls");
                                               gstate.pot <- gstate.pot + (gstate.bet - bet);
                                               cycleinside gstate t
-                                    | Raise y -> print_endline ("Player raises " ^ string_of_int y ^ " dollars");
+                                    | Raise y -> print_endline (h.name ^ " raises " ^ string_of_int y ^ " dollars");
                                                  gstate.pot <- (gstate.pot + (gstate.bet - bet) + y);
                                                  gstate.bet <- gstate.bet + y;
                                                  cycleinside gstate t)
                       | Flop ->    current_best_hand h; (*compute the best hand*)
                                    (match Ai.decisionflop h gstate.bet with
-                                    | Fold -> print_endline ("Player folds"); cycleinside gstate t
-                                    | Call -> print_endline ("Player calls");
+                                    | Fold -> print_endline (h.name ^ " folds"); cycleinside gstate t
+                                    | Call -> print_endline (h.name ^ " calls");
                                               gstate.pot <- gstate.pot + (gstate.bet - bet);
                                               cycleinside gstate t
-                                    | Raise y -> print_endline ("Player raises " ^ string_of_int y ^ " dollars");
+                                    | Raise y -> print_endline (h.name ^ " raises " ^ string_of_int y ^ " dollars");
                                                  (gstate.pot <- gstate.pot + (gstate.bet - bet) + y);
                                                   gstate.bet <- gstate.bet + y;
                                                  cycleinside gstate t)
                       | Turn ->    current_best_hand h; (*compute the best hand*)
                                    (match Ai.decisionturn h gstate.bet with
-                                    | Fold -> print_endline ("Player folds"); cycleinside gstate t
-                                    | Call -> print_endline ("Player calls");
+                                    | Fold -> print_endline (h.name ^ " folds"); cycleinside gstate t
+                                    | Call -> print_endline (h.name ^ " calls");
                                               gstate.pot <- gstate.pot + (gstate.bet - bet);
                                               cycleinside gstate t
-                                    | Raise y -> print_endline ("Player raises " ^ string_of_int y ^ " dollars");
+                                    | Raise y -> print_endline (h.name ^ " raises " ^ string_of_int y ^ " dollars");
                                                  (gstate.pot <- gstate.pot + (gstate.bet - bet) + y);
                                                   gstate.bet <- gstate.bet + y;
                                                   cycleinside gstate t)
                       | River -> current_best_hand h; (*computes the best hand*)
                                    (match Ai.decisionriver h gstate.bet with
-                                    | Fold -> print_endline ("Player folds"); cycleinside gstate t
-                                    | Call -> print_endline ("Player calls");
+                                    | Fold -> print_endline (h.name ^ " folds"); cycleinside gstate t
+                                    | Call -> print_endline (h.name ^ " calls");
                                               gstate.pot <- gstate.pot + (gstate.bet - bet);
                                               cycleinside gstate t
-                                    | Raise y -> print_endline ("Player raises " ^ string_of_int y ^ " dollars");
+                                    | Raise y -> print_endline (h.name ^ " raises " ^ string_of_int y ^ " dollars");
                                                  (gstate.pot <- gstate.pot + (gstate.bet - bet) + y);
                                                   gstate.bet <- gstate.bet + y;
                                                   cycleinside gstate t)
@@ -279,7 +279,7 @@ and finish_round gstate =
   let player_not_bust = List.fold_left (fun acc x -> acc || x.human) false updated_playerlist in
   if player_not_bust then
     if List.length updated_playerlist = 1 then
-     (print_endline "You won!!!!";
+     (print_endline "You won!!!! Mazal tov!";
       print_endline "Would you like to play another game?";
     let rec input_helper () =
       let result = read_line() in
@@ -351,6 +351,7 @@ and engine gstate =
     cycle gstate
     | River -> print_string "River: "; add_cardto_table gstate;
     printcardlist gstate.table;
+    print_newline();
     cycle gstate
     | End -> finish_round gstate
 
