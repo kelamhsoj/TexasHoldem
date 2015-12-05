@@ -177,8 +177,9 @@ and cycle gstate =
                                     | Call -> print_endline ("Player calls");
                                               gstate.pot <- gstate.pot + (gstate.bet - bet);
                                               cycleinside gstate t
-                                    | Raise y -> (gstate.pot <- gstate.pot + (gstate.bet - bet) + y);
-                                                  gstate.bet <- gstate.bet + y;
+                                    | Raise y -> print_endline ("Player raises " ^ string_of_int y ^ " dollars");
+                                                 gstate.pot <- (gstate.pot + (gstate.bet - bet) + y);
+                                                 gstate.bet <- gstate.bet + y;
                                                   cycleinside gstate t)
                       | Flop -> (match Ai.decisionflop h gstate.bet with
                                     | Fold -> print_endline ("Player folds"); cycleinside gstate t
