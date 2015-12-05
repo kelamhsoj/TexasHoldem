@@ -23,7 +23,7 @@ open Str
 
 
 type stage = Welcome| Init |Preflop |Flop |Turn |River |End
-type gamestate = {mutable pot:int; deck:deck; mutable table: card list;
+type gamestate = {mutable pot:int; mutable deck: deck; mutable table: card list;
                   mutable players: player list; mutable bet: int; mutable mode: stage}
 
 (*Create new gamestate*)
@@ -181,7 +181,8 @@ and cycle gstate =
                                                  gstate.pot <- (gstate.pot + (gstate.bet - bet) + y);
                                                  gstate.bet <- gstate.bet + y;
                                                   cycleinside gstate t)
-                      | Flop -> (match Ai.decisionflop h gstate.bet with
+                      | Flop -> current_best_hand h; (*compute the best hand*)
+                                   (match Ai.decisionflop h gstate.bet with
                                     | Fold -> print_endline ("Player folds"); cycleinside gstate t
                                     | Call -> print_endline ("Player calls");
                                               gstate.pot <- gstate.pot + (gstate.bet - bet);
@@ -189,14 +190,16 @@ and cycle gstate =
                                     | Raise y -> (gstate.pot <- gstate.pot + (gstate.bet - bet) + y);
                                                   gstate.bet <- gstate.bet + y;
                                               cycleinside gstate t)
-                      | Turn -> (match Ai.decisionturn h gstate.bet with
+                      | Turn -> current_best_hand h; (*compute the best hand*)
+                                   (match Ai.decisionturn h gstate.bet with
                                     | Fold -> print_endline ("Player folds"); cycleinside gstate t
                                     | Call -> print_endline ("Player calls");
                                               gstate.pot <- gstate.pot + (gstate.bet - bet);
                                               cycleinside gstate t
                                     | Raise y -> (gstate.pot <- gstate.pot + (gstate.bet - bet) + y);
                                                   gstate.bet <- gstate.bet + y)
-                      | River -> (match Ai.decisionriver h gstate.bet with
+                      | River -> current_best_hand h; (*computes the best hand*)
+                                   (match Ai.decisionriver h gstate.bet with
                                     | Fold -> print_endline ("Player folds"); cycleinside gstate t
                                     | Call -> print_endline ("Player calls");
                                               gstate.pot <- gstate.pot + (gstate.bet - bet);
@@ -214,30 +217,59 @@ in begin (cycleinside gstate gstate.players); run_cycle gstate end
   and stage goes back to init
 *)
 and finish_round gstate =
-  for x = 0 to ((List.length gstate.players)-1) do
-    let p = (List.nth gstate.players x) in
-    match p.state with
-      | Folded -> ()
-      | Allin  -> failwith "TODO"
-      | Playing -> failwith "TODO"
+  for x = 0 to (List.length gstate.players -1) do
+  let p = List.nth gstate.players x in
+  (current_best_hand p)
+  done; (*make sure everyone has the most updated hands*)
 
-  done;
-  print_endline "Would you like to play another round?";
-  let rec input_helper () =
-    let result = read_line() in
-    let result' = String.lowercase result in
-    match result' with
-      | "yes" -> print_endline "Ok, starting new round!";
-                gstate.mode <- Init
-      | "no" -> print_endline "Ok, quitting"
+  let best_hands = winners (gstate.players) in
+  let split_pot = (gstate.pot) / (List.length best_hands) in
+
+  for x = 0 to (List.length best_hands -1) do
+  let p = List.nth best_hands x in
+  (p.money <- money + split_pot) done
+
+  let rec remove_nomoney acc lst =
+  match lst with
+  | [] -> acc
+  | h :: t -> if (h.money = 0) then remove_nomoney acc t else
+              remove_nomoney (h::acc) t in
+
+  let updated_playerlist = remove_nomoney [] gstate.players in
+
+  let player_not_bust = List.fold_left (fun acc x -> acc || x.human) false updated_playerlist in
+
+  if player_not_bust then begin print_endline "Would you like to play another round?";
+    let rec input_helper () =
+      let result = read_line() in
+      let result' = String.lowercase result in
+      match result' with
+        | "yes" -> print_endline "Ok, starting new round!";
+                gstate.pot <- 0;
+                gstate.players <- updated_playerlist;
+                gstate.deck = newdeck();
+                gstate.bet <- 100;
+                gstate.mode <- Init;
+                gstate.table < - []
+        | "no" -> print_endline "Ok, quitting"
                (*quit*)
-      | _ -> print_endline "It was a yes or no question.";
-             input_helper () in
-
+        | _ -> print_endline "It was a yes or no question.";
+               input_helper () in
   input_helper ();
-  engine gstate
-
-
+  engine gstate end
+  else (print_endline "You have lost all your money." ;
+    print_endline "Would you like to play again?" ;
+     let rec input_helper () =
+       (let result = read_line() in
+       let result' = String.lowercase result in
+       match result' with
+        | "yes" -> print_endline "Ok, starting new game!";
+                let newstate = init_game () in
+                newstate.mode <- Init;
+                engine newstate
+        | "no" -> print_endline "Ok, quitting"
+        | _ -> print_endline "It was a yes or no question.";
+               input_helper ()) in input_helper () )
 (*Main function that runs based on state of the game*)
 and engine gstate =
 (*add print statements when cards are added*)
