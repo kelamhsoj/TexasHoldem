@@ -367,3 +367,17 @@ let decisionriver (player : player) (currentbet : int) : action =
 
 let current_best_hand (player:player) : unit =
   player.best_hand <- Some (best_hand player.cards)
+
+let winners (players: player list) : player list =
+  let accumulator = [] in
+  let rec winnershelper (acc) (playerslst) =
+  match (acc, players) with
+  | ([], h::t) -> winnershelper [h] t
+  | (_, []) -> acc
+  | (h::t, h1::t1) -> (match (h.best_hand), (h1.best_hand) with
+                       | Some hand, Some hand1 -> let result = comparing hand hand1 in
+                                                  if result = -1 then winnershelper [h] t1
+                                                  else if result = 1 then winnershelper acc t1
+                                                  else winnershelper (h1::acc) t1
+                       | _ -> failwith "no hands?")
+  in winnershelper accumulator players

@@ -29,3 +29,5 @@ val decisionturn: player -> int -> action
 val decisionriver: player -> int -> action
 
 val current_best_hand: player -> unit
+
+val winners: player list -> player list
