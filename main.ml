@@ -34,12 +34,19 @@ let init_game () =  let human = create_human () in
   let ai4 = create_ai () in
   let playingdeck = newdeck () in
   let newgamestate = {pot = 0; deck = playingdeck; table=[];
-  players= [human; ai1; ai2; ai3; ai4]; bet = 1; mode = Welcome } in
+  players= [human; ai1; ai2; ai3; ai4]; bet = 100; mode = Welcome } in
   newgamestate
 
 let add_cardto_table gstate =
   let old = gstate.table in
-  gstate.table <- old @ (pop gstate.deck 1)
+  match gstate.mode with
+  | Flop -> let newc = pop gstate.deck 3 in
+            gstate.table <- newc
+  | Turn | River -> let newc = pop gstate.deck 1 in
+                    gstate.table <- old @ newc
+  | _ -> failwith "error"
+
+
 (*Prints promp and returns the action option of what the human wants to do*)
 let cycle_user_input (prompt: string): action option =
   print_string prompt;
@@ -69,6 +76,7 @@ let getuserdecision gstate player =
 (*Prints out a list of cards*)
 let rec printcardlist = function
   | [] -> ()
+  | [x] -> printcard x
   | h::t -> printcard h; print_string ", ";
             printcardlist t
 
@@ -236,15 +244,15 @@ and engine gstate =
     | Welcome -> welcome_user gstate
     | Init -> deal gstate
     | Preflop -> cycle gstate
-    | Flop -> add_cardto_table gstate;
+    | Flop -> print_string "Flop: "; add_cardto_table gstate;
     printcardlist gstate.table;
     print_newline();
     cycle gstate
-    | Turn -> add_cardto_table gstate;
+    | Turn -> print_string "Turn: "; add_cardto_table gstate;
     printcardlist gstate.table;
     print_newline();
     cycle gstate
-    | River -> add_cardto_table gstate;
+    | River -> print_string "River: "; add_cardto_table gstate;
     printcardlist gstate.table;
     cycle gstate
     | End -> finish_round gstate
