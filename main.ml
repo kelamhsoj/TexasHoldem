@@ -327,7 +327,7 @@ and finish_round gstate =
                 p.currentbet <- 0
                 done;
                 gstate.deck <- newdeck();
-                gstate.bet <- 100;
+                gstate.bet <- 5;
                 gstate.mode <- Init;
                 gstate.table <- [];
                 engine gstate
