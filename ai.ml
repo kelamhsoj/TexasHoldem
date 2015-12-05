@@ -9,9 +9,9 @@ type player = { mutable state : status ; mutable money : int;
 
 type action = Fold | Call | Raise of int
 
-let create_human () = {state = Playing ; money = 200; cards = []; currentbet = 0;
+let create_human () = {state = Playing ; money = 10000; cards = []; currentbet = 0;
                  best_hand = None; human=true}
-let create_ai () = {state = Playing ; money = 200; cards = []; currentbet = 0;
+let create_ai () = {state = Playing ; money = 10000; cards = []; currentbet = 0;
                  best_hand = None; human=false}
 
 let maxbet (playerlist : player list) : int =
@@ -23,15 +23,6 @@ let rec everyone_same_bet (currentbet: int) (playerlist : player list) : bool =
   | h::t -> if h.state = Playing then (currentbet = h.currentbet) &&
                                        everyone_same_bet currentbet t
             else everyone_same_bet currentbet t
-
-(*let percentagebet (best_combo : hand) : float =
-  match best_combo with
-  | Straightflush _ -> 1.0
-  | Fourofkind _ -> 0.95
-  | Fullhouse _ -> 0.85
-  | Flush _ -> 0.7
-  | Straight _-> 0.65
-  | _ -> Random.float 0.5*)
 
 let decisionpreflop (player : player) (currentbet: int) : action =
   let randomval = Random.float 1. in
@@ -67,8 +58,10 @@ let decisionpreflop (player : player) (currentbet: int) : action =
 
 let allinhelper (player: player) (currentbet : int) : action =
                                 player.state <- Allin;
+                                let playerstotal = player.currentbet + player.money in
                                 player.currentbet <- (player.currentbet + player.money);
                                 player.money <- 0;
+                                if playerstotal > currentbet then Raise (playerstotal-currentbet) else
                                 Call
 
 let foldhelper (player: player) : action =
@@ -369,15 +362,14 @@ let current_best_hand (player:player) : unit =
   player.best_hand <- Some (best_hand player.cards)
 
 let winners (players: player list) : player list =
-  let accumulator = [] in
-  let rec winnershelper (acc) (playerslst) =
-  match (acc, players) with
-  | ([], h::t) -> winnershelper [h] t
-  | (_, []) -> acc
-  | (h::t, h1::t1) -> (match (h.best_hand), (h1.best_hand) with
-                       | Some hand, Some hand1 -> let result = comparing hand hand1 in
-                                                  if result = -1 then winnershelper [h] t1
-                                                  else if result = 1 then winnershelper acc t1
-                                                  else winnershelper (h1::acc) t1
-                       | _ -> failwith "no hands?")
-  in winnershelper accumulator players
+  let rec winnershelper (acc: player list) (playerslst: player list) =
+    match (acc, players) with
+    | ([], h::t) -> winnershelper [h] t
+    | (_, []) -> acc
+    | (h::t, h1::t1) -> (match (h.best_hand), (h1.best_hand) with
+                         | Some hand, Some hand1 -> let result = comparing hand hand1 in
+                                                    if result = -1 then winnershelper [h1] t1
+                                                    else if result = 1 then winnershelper acc t1
+                                                    else winnershelper (h1::acc) t1 (*zero*)
+                         | _ -> failwith "no hands?")
+  in winnershelper [] players
