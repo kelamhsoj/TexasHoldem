@@ -376,12 +376,16 @@ let current_best_hand (player:player) : unit =
 let winners (players: player list) : player list =
   let rec winnershelper (acc: player list) (playerslst: player list) =
     match (acc, playerslst) with
-    | ([], h::t) -> winnershelper [h] t
+    | ([], h::t) -> if h.state <> Folded then
+                       winnershelper [h] t
+                    else winnershelper [] t
     | (_, []) -> acc
-    | (h::t, h1::t1) -> (match (h.best_hand), (h1.best_hand) with
+    | (h::t, h1::t1) -> if h.state <> Folded then
+                         (match (h.best_hand), (h1.best_hand) with
                          | Some hand, Some hand1 -> let result = comparing hand hand1 in
                                                     if result = -1 then winnershelper [h1] t1
                                                     else if result = 1 then winnershelper acc t1
                                                     else winnershelper (h1::acc) t1 (*zero*)
                          | _ -> failwith "no hands?")
+                         else winnershelper (h::t) t1
   in winnershelper [] players
