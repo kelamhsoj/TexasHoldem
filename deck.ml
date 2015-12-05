@@ -75,11 +75,13 @@ let remove d (i: int) =
 
 
 let rec shuffle (d: deck) =
-  let len = List.length !d in
-  let i = Random.int len in
-  let ret = List.nth !d i in
-  let newd = ref (remove !d i) in
-  ref (ret::!(shuffle newd))
+  match !d with
+  | [] -> ref []
+  | _ -> let len = List.length !d in
+         let i = Random.int len in
+         let ret = List.nth !d i in
+         let newd = ref (remove !d i) in
+         ref (ret::!(shuffle newd))
 
 let rec pop d i =
   let len = List.length !d in
@@ -100,7 +102,7 @@ let newdeck () =
       result := cardi::!result
     done
   done;
-  result
+  shuffle result
 
 
 let printcard p =
