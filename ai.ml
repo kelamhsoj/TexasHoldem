@@ -380,7 +380,7 @@ let winners (players: player list) : player list =
                        winnershelper [h] t
                     else winnershelper [] t
     | (_, []) -> acc
-    | (h::t, h1::t1) -> if h.state <> Folded then
+    | (h::t, h1::t1) -> if h1.state <> Folded then
                          (match (h.best_hand), (h1.best_hand) with
                          | Some hand, Some hand1 -> let result = comparing hand hand1 in
                                                     if result = -1 then winnershelper [h1] t1
